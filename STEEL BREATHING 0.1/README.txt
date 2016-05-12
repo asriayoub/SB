@@ -7,14 +7,11 @@
 	down = inc i
 	
 ///////////////////////////////////////////////////////////////////////////
-///	Map tiles :															///
+///	Map tiles :	from file												///
 ///////////////////////////////////////////////////////////////////////////
 	a = empty tile
 	b = obstacle
 	c = soft obstact
-	p = player
-	m = monster
-	o = moving attack
 	
 ///////////////////////////////////////////////////////////////////////////
 ///	Map superficie recommandation:										///
@@ -26,10 +23,12 @@
 ///	Protocol's Commands :												///
 ///////////////////////////////////////////////////////////////////////////
 	Request : client to server
-		1 = MOVE
-		2 = NAME
-		3 = CHAT
+		0 = NAME REQUEST
+		1 = ACT REQUEST
+		2 = CHAT
 	
 	Response : server to client
-	101 = NEW informations
-	102 = NAME incorrect
+		100 = send hero
+		101 = NAME incorrect
+		102 = send Map
+		103 = send list of players
