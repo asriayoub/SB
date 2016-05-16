@@ -280,26 +280,19 @@ public abstract class Actor extends Element {
 	}
 
 	public String fromDirectionToString(Direction d) {
-		String condition = "";
 		switch (d) {
 		case UP:
-			condition = "UP";
-			break;
+			return "UP";
 		case DOWN:
-			condition = "DOWN";
-			break;
+			return "DOWN";
 		case RIGHT:
-			condition = "RIGHT";
-			break;
+			return "RIGHT";
 		case LEFT:
-			condition = "LEFT";
-			break;
+			return "LEFT";
 		case NONE:
-			condition = "NONE";
-			break;
+			return "NONE";
 		default:
-			break;
+			return "";
 		}
-		return condition;
 	}
 }

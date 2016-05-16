@@ -2,7 +2,7 @@ package Game;
 
 public enum Condition {
 
-	STANDING(0), RUNNING(6), WALKING(1), JUMPING(1), FIRING(0), UNREADY(0), DEAD(
+	STANDING(0), RUNNING(2), WALKING(1), JUMPING(1), FIRING(0), UNREADY(0), DEAD(
 			0), STRIKING(1), HIT(0);
 
 	private int value;

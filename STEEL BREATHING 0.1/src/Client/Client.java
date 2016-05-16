@@ -156,7 +156,7 @@ public class Client extends JFrame implements Runnable, KeyListener,
 			bufferIn.put(dataIn);
 			while ((n = socket.read(bufferIn)) != 0) {
 				System.out.println("loading :  " + n);
-				if (bufferIn.position() == length)
+				if (bufferIn.position() >= length)
 					break;
 			}
 			bufferIn.rewind();
@@ -198,11 +198,9 @@ public class Client extends JFrame implements Runnable, KeyListener,
 
 	public void setMapClean() {
 		map = new Element[mapClean.length][mapClean.length];
-		for (int i = 0; i < mapClean.length; i++) {
-			for (int j = 0; j < mapClean.length; j++) {
+		for (int i = 0; i < mapClean.length; i++)
+			for (int j = 0; j < mapClean.length; j++)
 				map[i][j] = mapClean[i][j];
-			}
-		}
 	}
 
 	public void sendName() {
@@ -217,7 +215,6 @@ public class Client extends JFrame implements Runnable, KeyListener,
 			bufferOut.flip();
 			socket.write(bufferOut);
 			sc.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
