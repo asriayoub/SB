@@ -114,8 +114,8 @@ public abstract class Actor extends Element {
 			changeCondition(c);
 			if (c != Condition.JUMPING)
 				changeDirection(d);
-			System.out.println(direction);
-			System.out.println(condition);
+			//System.out.println(direction);
+			//System.out.println(condition);
 			for (int k = 0; k < c.getValue(); k++)
 				switch (d) {
 				case UP:
@@ -147,8 +147,8 @@ public abstract class Actor extends Element {
 								fromDirectionToString(direction),
 								fromConditionToString(condition), level, life,
 								lifeMax));
-		System.out.println(position);
-		System.out.println(zone.getPosition());
+		//System.out.println(position);
+		//System.out.println(zone.getPosition());
 	}
 
 	private boolean isInMap(int i, int j) {
@@ -191,10 +191,10 @@ public abstract class Actor extends Element {
 		if (isInMap(position.getI() + i, position.getJ() + j) && isActive()) {
 			if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Ground
 					&& isMovable() && !isAttacking()) {
-				System.out.println("IS MOVING");
+				//System.out.println("IS MOVING");
 				move(i, j);
 			} else if (isAttacking()) {
-				System.out.println("IS ATTACKING");
+				//System.out.println("IS ATTACKING");
 				strike(i, j);
 			}
 		}

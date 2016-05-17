@@ -21,12 +21,12 @@ import org.apache.commons.lang.SerializationUtils;
 import Client.Action;
 import Client.Avatar;
 import Exception.NameExistsException;
-import Game.Condition;
 import Game.Element;
 import Game.Maps;
 import Game.Player;
 import Game.Position;
 import Game.State;
+import Game.Wait;
 import Manager.Creator;
 
 public class Server {
@@ -60,33 +60,41 @@ public class Server {
 		map = creator.readMapFromFile("BattleField");
 		creator.displayZones(map);
 
-		new Thread(new Worker(this)).start();
 	}
 
 	public void run() throws IOException {
 		System.out.println("SERVER LAUNCHED..");
+		long interval, time1, time2;
 		while (true) {
-			selector.select(100);
-			selector.selectedKeys().forEach(k -> {
-				if (k.isValid()) {
-					if (k.isAcceptable()) {
-						System.out.println("Acceptable");
+			interval = 100;
+			time1 = System.currentTimeMillis();
+			while (interval > 0) {
+				selector.select(interval);
+				time2 = System.currentTimeMillis();
+				interval -= time2 - time1;
+				selector.selectedKeys().forEach(k -> {
+					if (k.isValid()) {
+						if (k.isAcceptable()) {
+							// System.out.println("Acceptable");
 						accept();
 					} else if (k.isReadable()) {
-						System.out.println("Readable");
+						// System.out.println("Readable");
 						read(k);
 					} else if (k.isWritable()) {
 						write(k);
 					}
 				}
-			});
-			selector.selectedKeys().clear();
+			}	);
+				selector.selectedKeys().clear();
+			}
+			// GAME'S LOGIC
+			PrepareUsersForNewsReception();
 		}
 	}
 
 	private void accept() {
 		try {
-			System.out.println(".New Client is Connected");
+			// System.out.println(".New Client is Connected");
 			SocketChannel channel = serverSocket.accept();
 			channel.configureBlocking(false);
 			channel.register(selector, SelectionKey.OP_READ);
@@ -99,19 +107,19 @@ public class Server {
 		SocketChannel channel = (SocketChannel) k.channel();
 		try {
 			switch (userByChannel.get(channel).getAwaiting()) {
-			case "HERO":
-				System.out.println("SENDING NAME ACCEPT");
+			case HERO:
+				// System.out.println("SENDING NAME ACCEPT");
 				sendacceptName(channel);
 				break;
-			case "INFO":
+			case INFO:
 				sendActorsData(channel);
 				break;
-			case "MAP":
-				System.out.println("SENDING MAP");
+			case MAP:
+				// System.out.println("SENDING MAP");
 				sendMapTilesData(channel);
 				break;
-			case "LOADING":
-				System.out.println("LOADING");
+			case LOADING:
+				// System.out.println("LOADING");
 				loadingData(channel);
 				break;
 			default:
@@ -148,6 +156,17 @@ public class Server {
 		}
 	}
 
+	private void PrepareUsersForNewsReception() {
+		channelByName.forEach((key, c) -> {
+			try {
+				c.register(selector, SelectionKey.OP_WRITE);
+			} catch (Exception e) {
+				// System.out.println(".Player might be disconnected");
+				e.printStackTrace();
+			}
+		});
+	}
+
 	private void processingNameRequest(SocketChannel channel)
 			throws IOException {
 		try {
@@ -160,9 +179,9 @@ public class Server {
 			userByChannel.put(channel, new User(player));
 			channelByName.put(name, channel);
 			player.loadOnMap(map);
-			player.getZone().displayPlayers();
+			// player.getZone().displayPlayers();
 
-			System.out.println("connected players:" + names.size());
+			// System.out.println("connected players:" + names.size());
 		} catch (NameExistsException e) {
 			buffer.clear();
 			buffer.putInt(101);
@@ -176,7 +195,7 @@ public class Server {
 		buffer.get(data);
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		Action m = (Action) SerializationUtils.deserialize(bis);
-		System.out.println(m);
+		// System.out.println(m);
 		userByChannel.get(channel).getPlayer().act(m.direction, m.condition);
 	}
 
@@ -193,34 +212,26 @@ public class Server {
 		channel.write(userByChannel.get(channel).getBuffer());
 		userByChannel.get(channel).getBuffer().clear();
 
-		userByChannel.get(channel).setAwaiting("MAP");
+		userByChannel.get(channel).setAwaiting(Wait.MAP);
 	}
 
 	private void sendActorsData(SocketChannel channel) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		ArrayList<Avatar> neighbors = new ArrayList<>();
 
 		int z = userByChannel.get(channel).getPlayer().getZone().getPosition()
 				.getI();
 		int y = userByChannel.get(channel).getPlayer().getZone().getPosition()
 				.getJ();
-
-		ArrayList<Avatar> neighbors = new ArrayList<>();
-
-		for (int i = z - 1; i < z + 1; i++)
-			for (int j = y - 1; j < y + 1; j++)
+		for (int i = z - 1; i <= z + 1; i++)
+			for (int j = y - 1; j <= y + 1; j++)
 				neighbors.addAll(map.getZones()[i][j].getPlayers().values());
+		// System.out.println(neighbors.size());
 
-		System.out.println(neighbors.size());
-		ByteBuffer b = ByteBuffer.allocate(1000);
-		b.putInt(103);
 		oos.writeObject(neighbors);
 		byte[] data = bos.toByteArray();
-		System.out.println(data.length);
-		b.put(data);
-		b.flip();
-		channel.write(b);
-		channel.register(selector, SelectionKey.OP_READ);
+		prepareBigDataForTransfer(data, channel, 103);
 	}
 
 	private void sendMapTilesData(SocketChannel channel) throws IOException {
@@ -228,16 +239,22 @@ public class Server {
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
 		oos.writeObject(mapClean);
 		byte[] data = bos.toByteArray();
-		System.out.println("Data : " + data.length);
-		userByChannel.get(channel).getBuffer().putInt(102);
+		prepareBigDataForTransfer(data, channel, 102);
+
+	}
+
+	private void prepareBigDataForTransfer(byte[] data, SocketChannel channel,
+			int type) throws IOException {
+		// System.out.println("Data : " + data.length);
+		userByChannel.get(channel).getBuffer().putInt(type);
 		userByChannel.get(channel).getBuffer().putInt(data.length);
 		userByChannel.get(channel).getBuffer().flip();
 		channel.write(userByChannel.get(channel).getBuffer());
 		userByChannel.get(channel).getBuffer().clear();
 		userByChannel.get(channel).setBuffer(ByteBuffer.wrap(data));
-		System.out.println("buffer : "
-				+ userByChannel.get(channel).getBuffer().capacity());
-		userByChannel.get(channel).setAwaiting("LOADING");
+		// System.out.println("buffer : "
+		// + userByChannel.get(channel).getBuffer().capacity());
+		userByChannel.get(channel).setAwaiting(Wait.LOADING);
 	}
 
 	private void loadingData(SocketChannel channel) throws IOException {
@@ -254,18 +271,20 @@ public class Server {
 						.remaining()];
 
 			userByChannel.get(channel).getBuffer().get(data);
-			System.out.println("data : " + data.length);
+			// System.out.println("data : " + data.length);
 			int n = channel.write(ByteBuffer.wrap(data));
-			System.out.println("data sent : " + n);
+			// System.out.println("data sent : " + n);
 			if (n == 0) {
 				userByChannel.get(channel).getBuffer().position(position);
+				channel.register(selector, SelectionKey.OP_WRITE);
 				break;
 			}
 		}
 		if (userByChannel.get(channel).getBuffer().position() == userByChannel
 				.get(channel).getBuffer().capacity()) {
 			userByChannel.get(channel).reAllocateBuffer();
-			userByChannel.get(channel).setAwaiting("INFO");
+			userByChannel.get(channel).setAwaiting(Wait.INFO);
+			channel.register(selector, SelectionKey.OP_READ);
 		}
 	}
 
@@ -279,37 +298,11 @@ public class Server {
 					.getName());
 			names.remove(userByChannel.get(channel).getPlayer().getName());
 			userByChannel.remove(channel);
-
 		}
 		try {
 			channel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-	}
-
-	public String fromConditionToString(Condition e) {
-		switch (e) {
-		case STANDING:
-			return "STANDING";
-		case RUNNING:
-			return "RUNNING";
-		case WALKING:
-			return "WALKING";
-		case JUMPING:
-			return "JUMPING";
-		case UNREADY:
-			return "UNREADY";
-		case FIRING:
-			return "FIRING";
-		case STRIKING:
-			return "STRIKING";
-		case DEAD:
-			return "DEAD";
-		case HIT:
-			return "HIT";
-		default:
-			return "";
 		}
 	}
 

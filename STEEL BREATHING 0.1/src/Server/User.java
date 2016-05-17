@@ -3,12 +3,13 @@ package Server;
 import java.nio.ByteBuffer;
 
 import Game.Player;
+import Game.Wait;
 
 public class User {
 	private ByteBuffer buffer;
 	private int size;
 
-	private String awaiting;
+	private Wait awaiting;
 
 	private Player player;
 
@@ -16,7 +17,7 @@ public class User {
 		this.player = player;
 		buffer = ByteBuffer.allocate(5000);
 		size = 5000;
-		awaiting = "HERO";
+		awaiting = Wait.HERO;
 	}
 
 	public ByteBuffer getBuffer() {
@@ -35,11 +36,11 @@ public class User {
 		this.size = size;
 	}
 
-	public String getAwaiting() {
+	public Wait getAwaiting() {
 		return awaiting;
 	}
 
-	public void setAwaiting(String awaiting) {
+	public void setAwaiting(Wait awaiting) {
 		this.awaiting = awaiting;
 	}
 

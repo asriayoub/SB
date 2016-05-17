@@ -95,12 +95,13 @@ public class Client extends JFrame implements Runnable, KeyListener,
 		try {
 			sendName();
 			while (true) {
-				bufferIn.clear();
+				reAllocateBufferIn();
 				if (socket.read(bufferIn) == -1)
 					throw new IOException();
 				bufferIn.flip();
 				int response = bufferIn.getInt();
-				System.out.println(response);
+				System.out.println(bufferIn.capacity());
+				// System.out.println(response);
 				switch (response) {
 
 				case 100: // hero
@@ -114,7 +115,6 @@ public class Client extends JFrame implements Runnable, KeyListener,
 				case 102: // map
 					recieveCleanMap();
 					setMapClean();
-					reAllocateBuffer();
 					setVisible(true);
 					break;
 
@@ -134,10 +134,28 @@ public class Client extends JFrame implements Runnable, KeyListener,
 	@SuppressWarnings("unchecked")
 	private ArrayList<Avatar> recieveOtherPlayers() {
 		try {
-			dataIn = new byte[bufferIn.remaining()];
+			int n;
+			int length = bufferIn.getInt();
+			if (bufferIn.remaining()>length) 
+				dataIn = new byte[length];
+			else
+				dataIn = new byte[bufferIn.remaining()];
+			
 			bufferIn.get(dataIn);
-			System.out.println(dataIn.length);
-			bis = new ByteArrayInputStream(dataIn);
+			bufferIn = ByteBuffer.allocate(length);
+			
+			System.out.println("le total : "+length);
+			System.out.println("le reste premier : "+dataIn.length);
+			
+			bufferIn.put(dataIn);
+			while ((n = socket.read(bufferIn)) != 0) {
+				System.out.println("loading :  " + n);
+				if (bufferIn.position() >= length)
+					break;
+			}
+			bufferIn.rewind();
+			// System.out.println(dataIn.length);
+			bis = new ByteArrayInputStream(bufferIn.array());
 			ois = new ObjectInputStream(bis);
 			return (ArrayList<Avatar>) ois.readObject();
 		} catch (IOException | ClassNotFoundException e) {
@@ -153,7 +171,12 @@ public class Client extends JFrame implements Runnable, KeyListener,
 			dataIn = new byte[bufferIn.remaining()];
 			bufferIn.get(dataIn);
 			bufferIn = ByteBuffer.allocate(length);
+			
+			System.out.println("le total : "+length);
+			System.out.println("le reste premier : "+dataIn.length);
+			
 			bufferIn.put(dataIn);
+
 			while ((n = socket.read(bufferIn)) != 0) {
 				System.out.println("loading :  " + n);
 				if (bufferIn.position() >= length)
@@ -172,7 +195,7 @@ public class Client extends JFrame implements Runnable, KeyListener,
 		try {
 			dataIn = new byte[bufferIn.remaining()];
 			bufferIn.get(dataIn);
-			System.out.println(dataIn.length);
+			// System.out.println(dataIn.length);
 			bis = new ByteArrayInputStream(dataIn);
 			ois = new ObjectInputStream(bis);
 			hero = (Avatar) ois.readObject();
@@ -186,7 +209,7 @@ public class Client extends JFrame implements Runnable, KeyListener,
 	public void receivedDataProcessing(ArrayList<Avatar> list) {
 		setMapClean();
 		System.out.println("List length :" + list.size());
-		list.forEach(r -> System.out.println(r));
+		// list.forEach(r -> System.out.println(r));
 		list.forEach(actor -> {
 			if (actor.name.equals(hero.name))
 				hero = actor;
@@ -233,7 +256,7 @@ public class Client extends JFrame implements Runnable, KeyListener,
 		}
 	}
 
-	public void reAllocateBuffer() {
+	public void reAllocateBufferIn() {
 		bufferIn = ByteBuffer.allocate(5000);
 	}
 

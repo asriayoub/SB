@@ -31,12 +31,8 @@ public class Creator {
 		m.setZones(new Zone[zones][zones]);
 		m.setZoneLength(zoneLength);
 		int k = 0;
-		System.out.println("map length :" + m.getLength());
-		System.out.println("zone length :" + zoneLength);
-		System.out.println("zones : " + zones);
 		int r = 0;
 		int z = 0;
-
 		for (int i = r; i < zones; i++) {
 			for (int j = z; j < zones; j++) {
 				m.getZones()[i][j] = new Zone("Zone " + k, new Position(i, j));
@@ -63,6 +59,9 @@ public class Creator {
 	}
 
 	public void displayZones(Maps m) {
+		System.out.println("map length :" + m.getLength());
+		System.out.println("zone length :" + m.getZoneLength());
+		System.out.println("zones : " + m.getLength() / m.getZoneLength());
 		for (int i = 0; i < m.getZones().length; i++) {
 			for (int j = 0; j < m.getZones().length; j++) {
 				System.out.print(m.getZones()[i][j].getName()
@@ -130,26 +129,26 @@ public class Creator {
 		}
 		br.close();
 
-		loadZonesOnMap(m, m.getLength()/m.getZoneLength());
+		loadZonesOnMap(m, m.getLength() / m.getZoneLength());
 		return m;
 	}
 
 	public static void main(String[] args) throws IOException {
-//		Creator CREATOR = new Creator();
+		// Creator CREATOR = new Creator();
 
-//		Maps map = new Maps();
-//
-//		CREATOR.createMapTiles(99, map);
-//		CREATOR.loadZonesOnMap(map, 11);
-//		CREATOR.drawBorderOnMap(map);
-//
-//		CREATOR.displayZones(map);
-//		CREATOR.displayZoneTiles(map, new Position(3, 3));
-//		System.out.println(map.locateTileOnZone(new Position(15, 5))
-//				.getPosition());
-//
-//		CREATOR.writeMapToFile(map, "BattleField");
-		
-//		Maps map2 = CREATOR.readMapFromFile("BattleField");
+		// Maps map = new Maps();
+		//
+		// CREATOR.createMapTiles(99, map);
+		// CREATOR.loadZonesOnMap(map, 11);
+		// CREATOR.drawBorderOnMap(map);
+		//
+		// CREATOR.displayZones(map);
+		// CREATOR.displayZoneTiles(map, new Position(3, 3));
+		// System.out.println(map.locateTileOnZone(new Position(15, 5))
+		// .getPosition());
+		//
+		// CREATOR.writeMapToFile(map, "BattleField");
+
+		// Maps map2 = CREATOR.readMapFromFile("BattleField");
 	}
 }
