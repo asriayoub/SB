@@ -126,84 +126,35 @@ public class Client extends JFrame implements Runnable, KeyListener,
 					break;
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private ArrayList<Avatar> recieveOtherPlayers() {
-		try {
-			int n;
-			int length = bufferIn.getInt();
-			if (bufferIn.remaining()>length) 
-				dataIn = new byte[length];
-			else
-				dataIn = new byte[bufferIn.remaining()];
-			
-			bufferIn.get(dataIn);
-			bufferIn = ByteBuffer.allocate(length);
-			
-			System.out.println("le total : "+length);
-			System.out.println("le reste premier : "+dataIn.length);
-			
-			bufferIn.put(dataIn);
-			while ((n = socket.read(bufferIn)) != 0) {
-				System.out.println("loading :  " + n);
-				if (bufferIn.position() >= length)
-					break;
-			}
-			bufferIn.rewind();
-			// System.out.println(dataIn.length);
-			bis = new ByteArrayInputStream(bufferIn.array());
-			ois = new ObjectInputStream(bis);
-			return (ArrayList<Avatar>) ois.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return null;
+	private ArrayList<Avatar> recieveOtherPlayers()
+			throws ClassNotFoundException, IOException {
+		ifBufferHasRemaining();
+		collectBigData();
+		return (ArrayList<Avatar>) ois.readObject();
 	}
 
-	private void recieveCleanMap() {
-		try {
-			int n;
-			int length = bufferIn.getInt();
-			dataIn = new byte[bufferIn.remaining()];
-			bufferIn.get(dataIn);
-			bufferIn = ByteBuffer.allocate(length);
-			
-			System.out.println("le total : "+length);
-			System.out.println("le reste premier : "+dataIn.length);
-			
-			bufferIn.put(dataIn);
-
-			while ((n = socket.read(bufferIn)) != 0) {
-				System.out.println("loading :  " + n);
-				if (bufferIn.position() >= length)
-					break;
-			}
-			bufferIn.rewind();
-			bis = new ByteArrayInputStream(bufferIn.array());
-			ois = new ObjectInputStream(bis);
-			mapClean = (Element[][]) ois.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+	private void recieveCleanMap() throws IOException, ClassNotFoundException {
+		ifBufferHasRemaining();
+		collectBigData();
+		mapClean = (Element[][]) ois.readObject();
 	}
 
-	private void recieveHero() {
-		try {
-			dataIn = new byte[bufferIn.remaining()];
-			bufferIn.get(dataIn);
-			// System.out.println(dataIn.length);
-			bis = new ByteArrayInputStream(dataIn);
-			ois = new ObjectInputStream(bis);
-			hero = (Avatar) ois.readObject();
-			System.out.println(hero);
-			bufferIn.clear();
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+	private void recieveHero() throws IOException, ClassNotFoundException {
+		ifBufferHasRemaining();
+		dataIn = new byte[bufferIn.remaining()];
+		bufferIn.get(dataIn);
+		// System.out.println(dataIn.length);
+		bis = new ByteArrayInputStream(dataIn);
+		ois = new ObjectInputStream(bis);
+		hero = (Avatar) ois.readObject();
+		System.out.println(hero);
+		bufferIn.clear();
 	}
 
 	public void receivedDataProcessing(ArrayList<Avatar> list) {
@@ -256,8 +207,36 @@ public class Client extends JFrame implements Runnable, KeyListener,
 		}
 	}
 
+	private void collectBigData() throws IOException {
+		int n;
+		int length = bufferIn.getInt();
+		if (bufferIn.remaining() > length)
+			dataIn = new byte[length];
+		else
+			dataIn = new byte[bufferIn.remaining()];
+		bufferIn.get(dataIn);
+		bufferIn = ByteBuffer.allocate(length);
+		bufferIn.put(dataIn);
+		while ((n = socket.read(bufferIn)) != 0) {
+			// System.out.println("loading :  " + n);
+			if (bufferIn.position() >= length)
+				break;
+		}
+		bufferIn.rewind();
+		bis = new ByteArrayInputStream(bufferIn.array());
+		ois = new ObjectInputStream(bis);
+	}
+
 	public void reAllocateBufferIn() {
 		bufferIn = ByteBuffer.allocate(5000);
+	}
+
+	private void ifBufferHasRemaining() throws IOException {
+		if (!bufferIn.hasRemaining()) {
+			bufferIn.clear();
+			socket.read(bufferIn);
+			bufferIn.flip();
+		}
 	}
 
 	@Override

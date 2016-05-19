@@ -9,6 +9,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang.SerializationUtils;
 
@@ -61,140 +62,27 @@ public class NPC implements Runnable {
 		mapClean = null;
 		map = null;
 
-		names = new ArrayList<>();
-		generateNames();
+		names = generateAlphabetNames(10, 200);
 	}
+	
+	public ArrayList<String> generateAlphabetNames(int length, int number) {
+		ArrayList<String> names = new ArrayList<>();
+		char[] alphabet = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+				'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+				'w', 'x', 'y', 'z' };
 
-	private void generateNames() {
-		names.add("aa");
-		names.add("ab");
-		names.add("ac");
-		names.add("av");
-		names.add("aw");
-		names.add("ax");
-		names.add("an");
-		names.add("aq");
-		names.add("as");
-		names.add("dd");
-		names.add("ad");
-		names.add("af");
-
-		names.add("aaa");
-		names.add("aba");
-		names.add("aca");
-		names.add("ava");
-		names.add("awa");
-		names.add("axa");
-		names.add("ana");
-		names.add("aqa");
-		names.add("asa");
-		names.add("dda");
-		names.add("ada");
-		names.add("afa");
-
-		names.add("aaab");
-		names.add("abab");
-		names.add("acab");
-		names.add("avab");
-		names.add("awab");
-		names.add("axab");
-		names.add("anab");
-		names.add("aqab");
-		names.add("asab");
-		names.add("ddab");
-		names.add("adab");
-		names.add("afab");
-
-		names.add("baa");
-		names.add("bab");
-		names.add("bac");
-		names.add("bav");
-		names.add("baw");
-		names.add("bax");
-		names.add("ban");
-		names.add("baq");
-		names.add("bas");
-		names.add("bdd");
-		names.add("bad");
-		names.add("baf");
-
-		names.add("baaa");
-		names.add("baba");
-		names.add("baca");
-		names.add("bava");
-		names.add("bawa");
-		names.add("baxa");
-		names.add("bana");
-		names.add("baqa");
-		names.add("basa");
-		names.add("bdda");
-		names.add("bada");
-		names.add("bafa");
-
-		names.add("baaab");
-		names.add("babab");
-		names.add("bacab");
-		names.add("bavab");
-		names.add("bawab");
-		names.add("baxab");
-		names.add("banab");
-		names.add("baqab");
-		names.add("basab");
-		names.add("bddab");
-		names.add("badab");
-		names.add("bafab");
-
-		names.add("aaaa");
-		names.add("abaa");
-		names.add("acaa");
-		names.add("avaa");
-		names.add("awaa");
-		names.add("axaa");
-		names.add("aana");
-		names.add("aaqa");
-		names.add("aasa");
-		names.add("dada");
-		names.add("adaa");
-		names.add("afaa");
-
-		names.add("aaaaa");
-		names.add("abaaa");
-		names.add("acaaa");
-		names.add("avaaa");
-		names.add("awaaa");
-		names.add("axaaa");
-		names.add("aaana");
-		names.add("aaqaa");
-		names.add("aasaa");
-		names.add("dadaa");
-		names.add("adaaa");
-		names.add("afaaa");
-
-		names.add("aaaaaa");
-		names.add("abaaaa");
-		names.add("acaaaa");
-		names.add("avaaaa");
-		names.add("awaaaa");
-		names.add("axaaaa");
-		names.add("aaaana");
-		names.add("aaqaaa");
-		names.add("aasaaa");
-		names.add("dadaaa");
-		names.add("adaaaa");
-		names.add("afaaaa");
-
-		names.add("aaaaab");
-		names.add("abaaab");
-		names.add("acaaab");
-		names.add("avaaab");
-		names.add("awaaab");
-		names.add("axaaab");
-		names.add("aaaaab");
-		names.add("aaqaab");
-		names.add("aasaab");
-		names.add("dadaab");
-		names.add("adaaab");
-		names.add("afaaab");
+		Random rand = new Random();
+		String name;
+		int r;
+		for (int j = 0; j < number; j++) {
+			name = "";
+			for (int i = 0; i < length; i++) {
+				r = rand.nextInt(26);
+				name += alphabet[r];
+			}
+			names.add(name);
+		}
+		return names;
 	}
 
 	@Override
@@ -220,6 +108,7 @@ public class NPC implements Runnable {
 					break;
 
 				case 102: // map
+					System.out.println(Thread.currentThread().getName());
 					recieveCleanMap();
 					setMapClean();
 					break;
@@ -232,71 +121,27 @@ public class NPC implements Runnable {
 					break;
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private ArrayList<Avatar> recieveOtherPlayers() {
-		try {
-			int length = bufferIn.getInt();
-
-			if (bufferIn.remaining() > length)
-				dataIn = new byte[length];
-			else
-				dataIn = new byte[bufferIn.remaining()];
-
-			bufferIn.get(dataIn);
-			bufferIn = ByteBuffer.allocate(length);
-			bufferIn.put(dataIn);
-
-			System.out.println("le total : " + length);
-			System.out.println("le reste premier : " + dataIn.length);
-			if (length < dataIn.length) {
-				System.exit(0);
-			}
-			int n;
-			while ((n = socket.read(bufferIn)) != 0) {
-				// System.out.println("loading :  " + n);
-				if (bufferIn.position() >= length)
-					break;
-			}
-			bufferIn.rewind();
-			// System.out.println(dataIn.length);
-			bis = new ByteArrayInputStream(bufferIn.array());
-			ois = new ObjectInputStream(bis);
+	private ArrayList<Avatar> recieveOtherPlayers() throws IOException, ClassNotFoundException {
+			ifBufferHasRemaining();
+			collectBigData();
 			return (ArrayList<Avatar>) ois.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
-	private void recieveCleanMap() {
-		try {
-			int n;
-			int length = bufferIn.getInt();
-			dataIn = new byte[bufferIn.remaining()];
-			bufferIn.get(dataIn);
-			bufferIn = ByteBuffer.allocate(length);
-			bufferIn.put(dataIn);
-			while ((n = socket.read(bufferIn)) != 0) {
-				// System.out.println("loading :  " + n);
-				if (bufferIn.position() >= length)
-					break;
-			}
-			bufferIn.rewind();
-			bis = new ByteArrayInputStream(bufferIn.array());
-			ois = new ObjectInputStream(bis);
+	private void recieveCleanMap() throws ClassNotFoundException, IOException {
+			ifBufferHasRemaining();
+			collectBigData();
 			mapClean = (Element[][]) ois.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+			System.out.println(mapClean.length);
 	}
 
-	private void recieveHero() {
-		try {
+	private void recieveHero() throws IOException, ClassNotFoundException {
+			ifBufferHasRemaining();
 			dataIn = new byte[bufferIn.remaining()];
 			bufferIn.get(dataIn);
 			// System.out.println(dataIn.length);
@@ -305,9 +150,6 @@ public class NPC implements Runnable {
 			hero = (Avatar) ois.readObject();
 			// System.out.println(hero);
 			bufferIn.clear();
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void receivedDataProcessing(ArrayList<Avatar> list) {
@@ -357,18 +199,46 @@ public class NPC implements Runnable {
 		}
 	}
 
+	private void collectBigData() throws IOException {
+		int n;
+		int length = bufferIn.getInt();
+		if (bufferIn.remaining() > length)
+			dataIn = new byte[length];
+		else
+			dataIn = new byte[bufferIn.remaining()];
+		bufferIn.get(dataIn);
+		bufferIn = ByteBuffer.allocate(length);
+		bufferIn.put(dataIn);
+		while ((n = socket.read(bufferIn)) != 0) {
+			// System.out.println("loading :  " + n);
+			if (bufferIn.position() >= length)
+				break;
+		}
+		bufferIn.rewind();
+		bis = new ByteArrayInputStream(bufferIn.array());
+		ois = new ObjectInputStream(bis);
+	}
+
 	public void reAllocateBuffer() {
 		bufferIn = ByteBuffer.allocate(5000);
 	}
 
-	public static void main(String[] args) throws IOException {
-		for (int i = 0; i < 99; i++) {
+	private void ifBufferHasRemaining() throws IOException {
+		if (!bufferIn.hasRemaining()) {
+			bufferIn.clear();
+			socket.read(bufferIn);
+			bufferIn.flip();
+		}
+	}
+
+	public static void main(String[] args) {
+		for (int i = 0; i < 190; i++) {
 			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Thread.sleep(100);
+				new Thread(new NPC(9090, "localhost")).start();
+			} catch (InterruptedException | IOException e) {
+				System.exit(0);
 			}
-			new Thread(new NPC(9090, "localhost")).start();
 		}
 	}
 }

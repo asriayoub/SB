@@ -66,7 +66,7 @@ public class Server {
 		System.out.println("SERVER LAUNCHED..");
 		long interval, time1, time2;
 		while (true) {
-			interval = 100;
+			interval = 50;
 			time1 = System.currentTimeMillis();
 			while (interval > 0) {
 				selector.select(interval);
@@ -109,7 +109,7 @@ public class Server {
 			switch (userByChannel.get(channel).getAwaiting()) {
 			case HERO:
 				// System.out.println("SENDING NAME ACCEPT");
-				sendacceptName(channel);
+				sendHeroData(channel);
 				break;
 			case INFO:
 				sendActorsData(channel);
@@ -131,13 +131,23 @@ public class Server {
 	}
 
 	private void read(SelectionKey k) {
+		ByteBuffer buffer;
 		SocketChannel channel = (SocketChannel) k.channel();
-		buffer.clear();
+		if (userByChannel.containsKey(channel))
+			buffer = userByChannel.get(channel).getBuffer();
+		else
+			buffer = this.buffer;
 		try {
-			if (channel.read(buffer) == -1)
+			int n;
+			if ((n = channel.read(buffer)) == -1)
 				throw new IOException();
+			System.out.println(n);
 			buffer.flip();
-			int cmd = buffer.getInt();
+			int cmd;
+			if (4 > n)
+				cmd = 404;
+			else
+				cmd = buffer.getInt();
 
 			switch (cmd) {
 			case 0: // name request
@@ -154,6 +164,7 @@ public class Server {
 		} catch (IOException e1) {
 			disconnectPlayer(channel);
 		}
+		buffer.clear();
 	}
 
 	private void PrepareUsersForNewsReception() {
@@ -180,7 +191,6 @@ public class Server {
 			channelByName.put(name, channel);
 			player.loadOnMap(map);
 			// player.getZone().displayPlayers();
-
 			// System.out.println("connected players:" + names.size());
 		} catch (NameExistsException e) {
 			buffer.clear();
@@ -190,17 +200,23 @@ public class Server {
 		}
 	}
 
-	private void processingActRequest(SocketChannel channel) {
-		byte[] data = new byte[buffer.remaining()];
-		buffer.get(data);
+	private void processingActRequest(SocketChannel channel) throws IOException {
+		ifBufferHasRemaining(userByChannel.get(channel).getBuffer(), channel);
+		byte[] data = new byte[userByChannel.get(channel).getBuffer()
+				.remaining()];
+		userByChannel.get(channel).getBuffer().get(data);
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		Action m = (Action) SerializationUtils.deserialize(bis);
 		// System.out.println(m);
 		userByChannel.get(channel).getPlayer().act(m.direction, m.condition);
 	}
 
-	private void sendacceptName(SocketChannel channel) throws IOException {
+	private void sendHeroData(SocketChannel channel) throws IOException {
 		userByChannel.get(channel).getBuffer().putInt(100);
+		userByChannel.get(channel).getBuffer().flip();
+		channel.write(userByChannel.get(channel).getBuffer());
+		userByChannel.get(channel).getBuffer().clear();
+
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
 		oos.writeObject(userByChannel.get(channel).getPlayer().getZone()
@@ -303,6 +319,15 @@ public class Server {
 			channel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void ifBufferHasRemaining(ByteBuffer buffer, SocketChannel channel)
+			throws IOException {
+		if (!buffer.hasRemaining()) {
+			buffer.clear();
+			channel.read(buffer);
+			buffer.flip();
 		}
 	}
 
