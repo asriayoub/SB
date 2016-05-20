@@ -7,6 +7,7 @@ import Game.Element;
 public class Avatar extends Element implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	public String kind;
 	public String name;
 
 	public int j;
@@ -24,9 +25,10 @@ public class Avatar extends Element implements Serializable {
 
 	}
 
-	public Avatar(String name, int j, int i, String direction,
+	public Avatar(String kind, String name, int j, int i, String direction,
 			String condition, int level, int life, int lifeMax) {
 		super();
+		this.kind=kind;
 		this.name = name;
 		this.j = j;
 		this.i = i;

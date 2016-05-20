@@ -161,10 +161,10 @@ public class Client extends JFrame implements Runnable, KeyListener,
 		setMapClean();
 		System.out.println("List length :" + list.size());
 		// list.forEach(r -> System.out.println(r));
-		list.forEach(actor -> {
-			if (actor.name.equals(hero.name))
-				hero = actor;
-			map[actor.i][actor.j] = actor;
+		list.forEach(avatar -> {
+			if (avatar.name.equals(hero.name))
+				hero = avatar;
+			map[avatar.i][avatar.j] = avatar;
 		});
 		System.out.println("[" + hero.i + "][" + hero.j + "]");
 		repaint();
@@ -267,10 +267,10 @@ public class Client extends JFrame implements Runnable, KeyListener,
 			return Color.RED;
 		if (e instanceof Avatar && e != hero) {
 			Avatar a = (Avatar) e;
-			if (a.condition.equals("DEAD"))
-				return Color.GRAY;
-			else
+			if (a.kind.equals("Player"))
 				return Color.BLUE;
+			else if(a.kind.equals("FireBall"))
+				return Color.YELLOW;
 		}
 		return null;
 	}
@@ -283,6 +283,14 @@ public class Client extends JFrame implements Runnable, KeyListener,
 		if (condition == Condition.STANDING)
 			condition = Condition.WALKING;
 		switch (code) {
+		case KeyEvent.VK_SPACE:
+			if (keyTyped == 0) {
+				condition = Condition.FIRING;
+				SendMove();
+			} else
+				condition = Condition.STANDING;
+			keyTyped++;
+			break;
 		case KeyEvent.VK_W:
 			if (keyTyped == 0) {
 				condition = Condition.STRIKING;
@@ -322,6 +330,9 @@ public class Client extends JFrame implements Runnable, KeyListener,
 	public void keyReleased(KeyEvent k) {
 		int code = k.getKeyCode();
 		switch (code) {
+		case KeyEvent.VK_SPACE:
+			keyTyped = 0;
+			break;
 		case KeyEvent.VK_W:
 			keyTyped = 0;
 			break;

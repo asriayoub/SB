@@ -12,13 +12,15 @@ public class Zone{
 	private int length;
 
 	private Map<String, Avatar> players;
-
+	private Map<Position, Avatar> attacks;
+	
 	public Zone() {
 
 	}
 
 	public Zone(String name, Position position) {
 		players = new HashMap<String, Avatar>();
+		attacks = new HashMap<Position, Avatar>();
 		this.name = name;
 		this.position = position;
 	}
@@ -45,6 +47,14 @@ public class Zone{
 
 	public void setPlayers(Map<String, Avatar> players) {
 		this.players = players;
+	}
+
+	public Map<Position, Avatar> getAttacks() {
+		return attacks;
+	}
+
+	public void setAttacks(Map<Position, Avatar> attacks) {
+		this.attacks = attacks;
 	}
 
 	public int getLength() {

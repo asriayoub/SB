@@ -1,13 +1,18 @@
 package Game;
 
+import java.util.HashMap;
+
 public class Maps {
 	private Element[][] tiles;
 	private Zone[][] zones;
 
 	private int length;
 	private int zoneLength;
-
+	
+	private HashMap<Position, RemoteAttack> remoteAttacks;
+	
 	public Maps() {
+		remoteAttacks = new HashMap<>();
 	}
 
 	public Maps(Element[][] e) {
@@ -44,6 +49,15 @@ public class Maps {
 
 	public void setZoneLength(int zoneLength) {
 		this.zoneLength = zoneLength;
+	}
+
+	
+	public HashMap<Position, RemoteAttack> getRemoteAttacks() {
+		return remoteAttacks;
+	}
+
+	public void setRemoteAttacks(HashMap<Position, RemoteAttack> remoteAttacks) {
+		this.remoteAttacks = remoteAttacks;
 	}
 
 	public void displayZonesNames() {

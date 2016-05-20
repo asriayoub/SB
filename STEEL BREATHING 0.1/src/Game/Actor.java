@@ -114,8 +114,8 @@ public abstract class Actor extends Element {
 			changeCondition(c);
 			if (c != Condition.JUMPING)
 				changeDirection(d);
-			//System.out.println(direction);
-			//System.out.println(condition);
+			// System.out.println(direction);
+			// System.out.println(condition);
 			for (int k = 0; k < c.getValue(); k++)
 				switch (d) {
 				case UP:
@@ -143,12 +143,13 @@ public abstract class Actor extends Element {
 		zone = map.locateTileOnZone(this.position);
 		zone.getPlayers()
 				.put(name,
-						new Avatar(name, position.getJ(), position.getI(),
+						new Avatar(this.getClass().getSimpleName(), name,
+								position.getJ(), position.getI(),
 								fromDirectionToString(direction),
 								fromConditionToString(condition), level, life,
 								lifeMax));
-		//System.out.println(position);
-		//System.out.println(zone.getPosition());
+		// System.out.println(position);
+		// System.out.println(zone.getPosition());
 	}
 
 	private boolean isInMap(int i, int j) {
@@ -191,11 +192,21 @@ public abstract class Actor extends Element {
 		if (isInMap(position.getI() + i, position.getJ() + j) && isActive()) {
 			if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Ground
 					&& isMovable() && !isAttacking()) {
-				//System.out.println("IS MOVING");
+				// System.out.println("IS MOVING");
 				move(i, j);
 			} else if (isAttacking()) {
-				//System.out.println("IS ATTACKING");
-				strike(i, j);
+				// System.out.println("IS ATTACKING");
+				switch (condition) {
+				case STRIKING:
+					strike(i, j);
+					break;
+				case FIRING:
+					System.out.println("fire");
+					fire(i, j);
+					break;
+				default:
+					break;
+				}
 			}
 		}
 	}
@@ -213,6 +224,16 @@ public abstract class Actor extends Element {
 			opponent.getHit(this);
 			opponent.setToInactive(Condition.HIT);
 			opponent.refresh();
+		}
+	}
+
+	public void fire(int i, int j) {
+		if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Ground
+				|| map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Gap) {
+			FireBall fireBall = new FireBall("Fire Ball", this, new Position(
+					position.getI() + i, position.getJ() + j),direction);
+			fireBall.loadOnMap(map);
+			System.out.println(fireBall);
 		}
 	}
 
@@ -249,50 +270,10 @@ public abstract class Actor extends Element {
 			zone = m.locateTileOnZone(position);
 			zone.getPlayers().put(
 					name,
-					new Avatar(name, position.getJ(), position.getI(), "NONE",
-							"NONE", level, life, lifeMax));
+					new Avatar(this.getClass().getSimpleName(), name, position
+							.getJ(), position.getI(), "NONE", "NONE", level,
+							life, lifeMax));
 		}
 	}
 
-	public String fromConditionToString(Condition e) {
-		switch (e) {
-		case STANDING:
-			return "STANDING";
-		case RUNNING:
-			return "RUNNING";
-		case WALKING:
-			return "WALKING";
-		case JUMPING:
-			return "JUMPING";
-		case UNREADY:
-			return "UNREADY";
-		case FIRING:
-			return "FIRING";
-		case STRIKING:
-			return "STRIKING";
-		case DEAD:
-			return "DEAD";
-		case HIT:
-			return "HIT";
-		default:
-			return "";
-		}
-	}
-
-	public String fromDirectionToString(Direction d) {
-		switch (d) {
-		case UP:
-			return "UP";
-		case DOWN:
-			return "DOWN";
-		case RIGHT:
-			return "RIGHT";
-		case LEFT:
-			return "LEFT";
-		case NONE:
-			return "NONE";
-		default:
-			return "";
-		}
-	}
 }

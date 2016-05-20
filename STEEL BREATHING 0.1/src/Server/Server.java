@@ -22,6 +22,7 @@ import Client.Action;
 import Client.Avatar;
 import Exception.NameExistsException;
 import Game.Element;
+import Game.Ground;
 import Game.Maps;
 import Game.Player;
 import Game.Position;
@@ -37,7 +38,7 @@ public class Server {
 	private Element[][] mapClean;
 	private Maps map;
 
-	public HashMap<String, SocketChannel> channelByName;
+	private HashMap<String, SocketChannel> channelByName;
 	private HashMap<SocketChannel, User> userByChannel;
 	private Collection<String> names;
 
@@ -66,7 +67,7 @@ public class Server {
 		System.out.println("SERVER LAUNCHED..");
 		long interval, time1, time2;
 		while (true) {
-			interval = 50;
+			interval = 100;
 			time1 = System.currentTimeMillis();
 			while (interval > 0) {
 				selector.select(interval);
@@ -88,8 +89,18 @@ public class Server {
 				selector.selectedKeys().clear();
 			}
 			// GAME'S LOGIC
+			ProgressTheGame();
 			PrepareUsersForNewsReception();
 		}
+	}
+
+	private void ProgressTheGame() {
+		actualizeRemoteAttacks();
+
+	}
+
+	private void actualizeRemoteAttacks() {
+		map.getRemoteAttacks().forEach((p, r) -> r.progress());
 	}
 
 	private void accept() {
@@ -141,14 +152,12 @@ public class Server {
 			int n;
 			if ((n = channel.read(buffer)) == -1)
 				throw new IOException();
-			System.out.println(n);
 			buffer.flip();
 			int cmd;
 			if (4 > n)
 				cmd = 404;
 			else
 				cmd = buffer.getInt();
-
 			switch (cmd) {
 			case 0: // name request
 				processingNameRequest(channel);
@@ -207,7 +216,7 @@ public class Server {
 		userByChannel.get(channel).getBuffer().get(data);
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		Action m = (Action) SerializationUtils.deserialize(bis);
-		// System.out.println(m);
+		System.out.println(m);
 		userByChannel.get(channel).getPlayer().act(m.direction, m.condition);
 	}
 
@@ -240,9 +249,14 @@ public class Server {
 				.getI();
 		int y = userByChannel.get(channel).getPlayer().getZone().getPosition()
 				.getJ();
-		for (int i = z - 1; i <= z + 1; i++)
-			for (int j = y - 1; j <= y + 1; j++)
+
+		for (int i = z - 1; i <= z + 1; i++) {
+			for (int j = y - 1; j <= y + 1; j++) {
 				neighbors.addAll(map.getZones()[i][j].getPlayers().values());
+				neighbors.addAll(map.getZones()[i][j].getAttacks().values());
+			}
+		}
+
 		// System.out.println(neighbors.size());
 
 		oos.writeObject(neighbors);
@@ -308,6 +322,9 @@ public class Server {
 		if (userByChannel.containsKey(channel)) {
 			System.out.println(userByChannel.get(channel).getPlayer().getName()
 					+ " : is disconnected");
+			map.getTiles()[userByChannel.get(channel).getPlayer().getPosition()
+					.getI()][userByChannel.get(channel).getPlayer()
+					.getPosition().getJ()] = new Ground();
 			userByChannel.get(channel).getPlayer().getZone().getPlayers()
 					.remove(userByChannel.get(channel).getPlayer().getName());
 			channelByName.remove(userByChannel.get(channel).getPlayer()
