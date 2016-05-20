@@ -28,7 +28,7 @@ public class Avatar extends Element implements Serializable {
 	public Avatar(String kind, String name, int j, int i, String direction,
 			String condition, int level, int life, int lifeMax) {
 		super();
-		this.kind=kind;
+		this.kind = kind;
 		this.name = name;
 		this.j = j;
 		this.i = i;
@@ -37,6 +37,11 @@ public class Avatar extends Element implements Serializable {
 		this.level = level;
 		this.life = life;
 		this.lifeMax = lifeMax;
+	}
+
+	public void setPosition(int i, int j) {
+		this.i = i;
+		this.j = j;
 	}
 
 	@Override

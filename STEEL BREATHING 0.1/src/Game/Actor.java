@@ -5,6 +5,7 @@ import Client.Avatar;
 public abstract class Actor extends Element {
 
 	protected String name;
+	protected Avatar avatar;
 
 	protected Maps map;
 	protected Zone zone;
@@ -27,6 +28,14 @@ public abstract class Actor extends Element {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Avatar getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(Avatar avatar) {
+		this.avatar = avatar;
 	}
 
 	public Position getPosition() {
@@ -139,15 +148,9 @@ public abstract class Actor extends Element {
 	}
 
 	public void refresh() {
-		zone.getPlayers().remove(name);
+		zone.getPlayers().remove(avatar);
 		zone = map.locateTileOnZone(this.position);
-		zone.getPlayers()
-				.put(name,
-						new Avatar(this.getClass().getSimpleName(), name,
-								position.getJ(), position.getI(),
-								fromDirectionToString(direction),
-								fromConditionToString(condition), level, life,
-								lifeMax));
+		zone.getPlayers().add(avatar);
 		// System.out.println(position);
 		// System.out.println(zone.getPosition());
 	}
@@ -215,6 +218,7 @@ public abstract class Actor extends Element {
 		map.getTiles()[position.getI()][position.getJ()] = new Ground();
 		map.getTiles()[position.getI() + i][position.getJ() + j] = this;
 		position = new Position(position.getI() + i, position.getJ() + j);
+		avatar.setPosition(position.getI(), position.getJ());
 	}
 
 	public void strike(int i, int j) {
@@ -230,8 +234,12 @@ public abstract class Actor extends Element {
 	public void fire(int i, int j) {
 		if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Ground
 				|| map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Gap) {
-			FireBall fireBall = new FireBall("Fire Ball", this, new Position(
-					position.getI() + i, position.getJ() + j),direction);
+			FireBall fireBall = new FireBall(map, this, new Position(position.getI()
+					+ i, position.getJ() + j), direction);
+			fireBall.avatar = new Avatar(fireBall.getClass().getSimpleName(),
+					this.getClass().getSuperclass().getSimpleName(),
+					position.getJ(), position.getI(),
+					fromDirectionToString(direction), "NONE", this.level, 0, 0);
 			fireBall.loadOnMap(map);
 			System.out.println(fireBall);
 		}
@@ -253,26 +261,26 @@ public abstract class Actor extends Element {
 
 	public void changeDirection(Direction d) {
 		if (d == Direction.UP || d == Direction.DOWN || d == Direction.RIGHT
-				|| d == Direction.LEFT || d == Direction.NONE)
+				|| d == Direction.LEFT || d == Direction.NONE) {
 			direction = d;
+			avatar.direction = fromDirectionToString(d);
+		}
 	}
 
 	public void changeCondition(Condition c) {
 		if (c == Condition.RUNNING || c == Condition.WALKING
 				|| c == Condition.STANDING || c == Condition.JUMPING
-				|| c == Condition.FIRING || c == Condition.STRIKING)
+				|| c == Condition.FIRING || c == Condition.STRIKING) {
 			condition = c;
+			avatar.condition = fromConditionToString(c);
+		}
 	}
 
 	public void loadOnMap(Maps m) {
 		if (zone == null) {
 			m.getTiles()[position.getI()][position.getJ()] = this;
 			zone = m.locateTileOnZone(position);
-			zone.getPlayers().put(
-					name,
-					new Avatar(this.getClass().getSimpleName(), name, position
-							.getJ(), position.getI(), "NONE", "NONE", level,
-							life, lifeMax));
+			zone.getPlayers().add(avatar);
 		}
 	}
 

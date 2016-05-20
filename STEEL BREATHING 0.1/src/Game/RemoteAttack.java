@@ -3,9 +3,10 @@ package Game;
 import Client.Avatar;
 
 public abstract class RemoteAttack extends Element {
-	protected String owner;
+	protected Avatar avatar;
 	protected Actor actor;
 
+	protected Maps map;
 	protected Zone zone;
 	protected Position position;
 
@@ -16,14 +17,8 @@ public abstract class RemoteAttack extends Element {
 		if (zone == null) {
 			m.getTiles()[position.getI()][position.getJ()] = this;
 			zone = m.locateTileOnZone(position);
-			zone.getAttacks().put(
-					position,
-					new Avatar(this.getClass().getSimpleName(), this.getClass()
-							.getSuperclass().getSimpleName(), position.getJ(),
-							position.getI(),
-							fromDirectionToString(actor.direction), "NONE",
-							actor.level, 0, 0));
-			actor.map.getRemoteAttacks().put(position, this);
+			zone.getAttacks().add(avatar);
+			map.getRemoteAttacks().add(this);
 		}
 	}
 
@@ -48,43 +43,39 @@ public abstract class RemoteAttack extends Element {
 	}
 
 	private void progress(int i, int j) {
-
-		if (actor.map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Ground) {
+		if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Ground) {
 			move(i, j);
 		} else
 			hit(i, j);
 	}
 
 	private void move(int i, int j) {
-		System.out.println(position);
-		actor.map.getTiles()[position.getI()][position.getJ()] = new Ground();
-		actor.map.getTiles()[position.getI() + i][position.getJ() + j] = this;
+		map.getTiles()[position.getI()][position.getJ()] = new Ground();
+		map.getTiles()[position.getI() + i][position.getJ() + j] = this;
 		position = new Position(position.getI() + i, position.getJ() + j);
-		System.out.println(position);
+		avatar.setPosition(position.getI(), position.getJ());
 	}
 
 	private void hit(int i, int j) {
-
+		direction = Direction.NONE;
+		map.getTiles()[position.getI()][position.getJ()] = new Ground();
+		map.getRemoteAttacks().remove(this);
+		zone.getAttacks().remove(avatar);
 	}
 
 	public void refresh() {
-		zone.getAttacks().remove(position);
-		zone = actor.map.locateTileOnZone(this.position);
-		zone.getAttacks()
-				.put(position,
-						new Avatar(this.getClass().getSimpleName(), this
-								.getClass().getSuperclass().getSimpleName(),
-								position.getJ(), position.getI(),
-								fromDirectionToString(direction),
-								"NONE", actor.level, 0,
-								0));
-		// System.out.println(position);
-		// System.out.println(zone.getPosition());
+		if (!direction.equals(Direction.NONE)) {
+			zone.getAttacks().remove(avatar);
+			zone = map.locateTileOnZone(this.position);
+			zone.getAttacks().add(avatar);
+			// System.out.println(position);
+			//System.out.println(zone.getPosition());
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "RemoteAttack [owner=" + owner + ", actor=" + actor + ", zone="
+		return "RemoteAttack [actor" + actor.name + ", zone="
 				+ zone + ", position=" + position + ", direction=" + direction
 				+ ", condition=" + condition + "]";
 	}

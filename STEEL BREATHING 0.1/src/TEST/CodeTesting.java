@@ -1,25 +1,26 @@
 package TEST;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import Game.Player;
 
 public class CodeTesting {
 
 	public static void main(String[] args) throws IOException {
-		HashMap<String,Player> players=new HashMap<>();
-
+		Collection<Player> players=new HashSet<>();
 		Player p1=new Player();
 		Player p2=new Player();
 		Player p3=new Player();
 
-		players.put("asri",p1);
-		players.put("wadizz",p2);
-		players.put("asri",p3);
+		players.add(p1);
+		players.add(p2);
+		players.add(p3);
 		
-		System.out.println(p1.getClass().getSimpleName());
-		System.out.println(players.get("asri"));
-		
+		System.out.println(players.size());
+		System.out.println(players.remove(p1));
+		System.out.println(players.size());
 	}
 }

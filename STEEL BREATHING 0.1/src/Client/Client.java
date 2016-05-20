@@ -159,8 +159,8 @@ public class Client extends JFrame implements Runnable, KeyListener,
 
 	public void receivedDataProcessing(ArrayList<Avatar> list) {
 		setMapClean();
-		System.out.println("List length :" + list.size());
-		// list.forEach(r -> System.out.println(r));
+		//System.out.println("List length :" + list.size());
+		list.forEach(r -> System.out.println(r));
 		list.forEach(avatar -> {
 			if (avatar.name.equals(hero.name))
 				hero = avatar;

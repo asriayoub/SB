@@ -100,7 +100,7 @@ public class Server {
 	}
 
 	private void actualizeRemoteAttacks() {
-		map.getRemoteAttacks().forEach((p, r) -> r.progress());
+		map.getRemoteAttacks().forEach((r) -> r.progress());
 	}
 
 	private void accept() {
@@ -195,6 +195,8 @@ public class Server {
 				throw new NameExistsException();
 			Player player = new Player(name, new Position(15, 12), map, 100,
 					100, 20, new State());
+			player.setAvatar(new Avatar(player.getClass().getSimpleName(),
+					name, 12, 15, "NONE", "NONE", 0, 100, 100));
 			names.add(name);
 			userByChannel.put(channel, new User(player));
 			channelByName.put(name, channel);
@@ -216,7 +218,7 @@ public class Server {
 		userByChannel.get(channel).getBuffer().get(data);
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		Action m = (Action) SerializationUtils.deserialize(bis);
-		System.out.println(m);
+		// System.out.println(m);
 		userByChannel.get(channel).getPlayer().act(m.direction, m.condition);
 	}
 
@@ -228,9 +230,7 @@ public class Server {
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeObject(userByChannel.get(channel).getPlayer().getZone()
-				.getPlayers()
-				.get(userByChannel.get(channel).getPlayer().getName()));
+		oos.writeObject(userByChannel.get(channel).getPlayer().getAvatar());
 		byte[] data = bos.toByteArray();
 		userByChannel.get(channel).getBuffer().put(data);
 		userByChannel.get(channel).getBuffer().flip();
@@ -252,11 +252,10 @@ public class Server {
 
 		for (int i = z - 1; i <= z + 1; i++) {
 			for (int j = y - 1; j <= y + 1; j++) {
-				neighbors.addAll(map.getZones()[i][j].getPlayers().values());
-				neighbors.addAll(map.getZones()[i][j].getAttacks().values());
+				neighbors.addAll(map.getZones()[i][j].getPlayers());
+				neighbors.addAll(map.getZones()[i][j].getAttacks());
 			}
 		}
-
 		// System.out.println(neighbors.size());
 
 		oos.writeObject(neighbors);
@@ -326,7 +325,7 @@ public class Server {
 					.getI()][userByChannel.get(channel).getPlayer()
 					.getPosition().getJ()] = new Ground();
 			userByChannel.get(channel).getPlayer().getZone().getPlayers()
-					.remove(userByChannel.get(channel).getPlayer().getName());
+					.remove(userByChannel.get(channel).getPlayer().getAvatar());
 			channelByName.remove(userByChannel.get(channel).getPlayer()
 					.getName());
 			names.remove(userByChannel.get(channel).getPlayer().getName());

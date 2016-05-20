@@ -1,6 +1,8 @@
 package Game;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Maps {
 	private Element[][] tiles;
@@ -9,10 +11,10 @@ public class Maps {
 	private int length;
 	private int zoneLength;
 	
-	private HashMap<Position, RemoteAttack> remoteAttacks;
+	private Collection<RemoteAttack> remoteAttacks;
 	
 	public Maps() {
-		remoteAttacks = new HashMap<>();
+		remoteAttacks = new HashSet<>();
 	}
 
 	public Maps(Element[][] e) {
@@ -51,12 +53,11 @@ public class Maps {
 		this.zoneLength = zoneLength;
 	}
 
-	
-	public HashMap<Position, RemoteAttack> getRemoteAttacks() {
+	public Collection<RemoteAttack> getRemoteAttacks() {
 		return remoteAttacks;
 	}
 
-	public void setRemoteAttacks(HashMap<Position, RemoteAttack> remoteAttacks) {
+	public void setRemoteAttacks(Collection<RemoteAttack> remoteAttacks) {
 		this.remoteAttacks = remoteAttacks;
 	}
 

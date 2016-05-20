@@ -1,26 +1,26 @@
 package Game;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
 
 import Client.Avatar;
 
-public class Zone{
+public class Zone {
 	private String name;
 	private Position position;
 
 	private int length;
 
-	private Map<String, Avatar> players;
-	private Map<Position, Avatar> attacks;
-	
+	private Collection<Avatar> players;
+	private Collection<Avatar> attacks;
+
 	public Zone() {
 
 	}
 
 	public Zone(String name, Position position) {
-		players = new HashMap<String, Avatar>();
-		attacks = new HashMap<Position, Avatar>();
+		players = new HashSet<Avatar>();
+		attacks = new HashSet<Avatar>();
 		this.name = name;
 		this.position = position;
 	}
@@ -41,19 +41,19 @@ public class Zone{
 		this.position = position;
 	}
 
-	public Map<String, Avatar> getPlayers() {
+	public Collection<Avatar> getPlayers() {
 		return players;
 	}
 
-	public void setPlayers(Map<String, Avatar> players) {
+	public void setPlayers(Collection<Avatar> players) {
 		this.players = players;
 	}
 
-	public Map<Position, Avatar> getAttacks() {
+	public Collection<Avatar> getAttacks() {
 		return attacks;
 	}
 
-	public void setAttacks(Map<Position, Avatar> attacks) {
+	public void setAttacks(Collection<Avatar> attacks) {
 		this.attacks = attacks;
 	}
 
@@ -65,10 +65,9 @@ public class Zone{
 		this.length = length;
 	}
 
-	public void displayPlayers(){
+	public void displayPlayers() {
 		System.out.println("players on this zone : { ");
-		players.forEach((key,v)-> System.out.println(v.name));
+		players.forEach(p -> System.out.println(p.name));
 		System.out.println(" }");
 	}
 }
-
