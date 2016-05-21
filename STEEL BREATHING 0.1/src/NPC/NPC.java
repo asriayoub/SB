@@ -64,7 +64,7 @@ public class NPC implements Runnable {
 
 		names = generateAlphabetNames(10, 200);
 	}
-	
+
 	public ArrayList<String> generateAlphabetNames(int length, int number) {
 		ArrayList<String> names = new ArrayList<>();
 		char[] alphabet = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
@@ -108,14 +108,16 @@ public class NPC implements Runnable {
 					break;
 
 				case 102: // map
-					System.out.println(Thread.currentThread().getName());
+					System.out.println(Thread.currentThread().getName() + " : "
+							+ response);
 					recieveCleanMap();
 					setMapClean();
 					break;
 
 				case 103: // list of players
 					ArrayList<Avatar> data = recieveOtherPlayers();
-					receivedDataProcessing(data);
+					if (map != null)
+						receivedDataProcessing(data);
 					break;
 				default:
 					break;
@@ -127,29 +129,29 @@ public class NPC implements Runnable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private ArrayList<Avatar> recieveOtherPlayers() throws IOException, ClassNotFoundException {
-			ifBufferHasRemaining();
-			collectBigData();
-			return (ArrayList<Avatar>) ois.readObject();
+	private ArrayList<Avatar> recieveOtherPlayers() throws IOException,
+			ClassNotFoundException {
+		ifBufferHasRemaining();
+		collectBigData();
+		return (ArrayList<Avatar>) ois.readObject();
 	}
 
 	private void recieveCleanMap() throws ClassNotFoundException, IOException {
-			ifBufferHasRemaining();
-			collectBigData();
-			mapClean = (Element[][]) ois.readObject();
-			System.out.println(mapClean.length);
+		ifBufferHasRemaining();
+		collectBigData();
+		mapClean = (Element[][]) ois.readObject();
 	}
 
 	private void recieveHero() throws IOException, ClassNotFoundException {
-			ifBufferHasRemaining();
-			dataIn = new byte[bufferIn.remaining()];
-			bufferIn.get(dataIn);
-			// System.out.println(dataIn.length);
-			bis = new ByteArrayInputStream(dataIn);
-			ois = new ObjectInputStream(bis);
-			hero = (Avatar) ois.readObject();
-			// System.out.println(hero);
-			bufferIn.clear();
+		ifBufferHasRemaining();
+		dataIn = new byte[bufferIn.remaining()];
+		bufferIn.get(dataIn);
+		// System.out.println(dataIn.length);
+		bis = new ByteArrayInputStream(dataIn);
+		ois = new ObjectInputStream(bis);
+		hero = (Avatar) ois.readObject();
+		// System.out.println(hero);
+		bufferIn.clear();
 	}
 
 	public void receivedDataProcessing(ArrayList<Avatar> list) {

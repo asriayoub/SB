@@ -27,6 +27,8 @@ public abstract class Element implements Serializable{
 			return "DEAD";
 		case HIT:
 			return "HIT";
+		case MOVINGFORWARD:
+			return "MOVINGFORWARD";
 		default:
 			return "";
 		}

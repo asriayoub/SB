@@ -53,7 +53,7 @@ public class Client extends JFrame implements Runnable, KeyListener,
 
 	Position center;
 	int pixel = 30;
-	int height = 19;
+	int height = 15;
 	int width = 19;
 	int viewHeight = pixel * height;
 	int viewWidth = pixel * width;
@@ -268,8 +268,11 @@ public class Client extends JFrame implements Runnable, KeyListener,
 		if (e instanceof Avatar && e != hero) {
 			Avatar a = (Avatar) e;
 			if (a.kind.equals("Player"))
-				return Color.BLUE;
-			else if(a.kind.equals("FireBall"))
+				if (a.condition.equals("DEAD")) {
+					return Color.GRAY;
+				}else
+					return Color.BLUE;
+			else if(a.name.equals("FireBall"))
 				return Color.YELLOW;
 		}
 		return null;

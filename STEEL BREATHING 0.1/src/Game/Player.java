@@ -9,10 +9,12 @@ public class Player extends Actor {
 		this.name = name;
 		this.position = position;
 		this.map = map;
+		this.direction = Direction.NONE;
+		this.condition = Condition.STANDING;
 		this.life = life;
 		this.lifeMax = lifeMax;
 		this.power = power;
-		this.state=state;
+		this.state = state;
 	}
 
 	public Player() {

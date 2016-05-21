@@ -34,7 +34,7 @@ public class Spamer implements Runnable {
 			rand = new Random();
 			r = rand.nextInt(4);
 			npc.direction = directions.get(r);
-			npc.condition = Condition.RUNNING;
+			npc.condition = Condition.WALKING;
 			npc.SendMove();
 		}
 	}

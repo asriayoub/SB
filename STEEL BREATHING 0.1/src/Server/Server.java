@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -26,6 +27,7 @@ import Game.Ground;
 import Game.Maps;
 import Game.Player;
 import Game.Position;
+import Game.RemoteAttack;
 import Game.State;
 import Game.Wait;
 import Manager.Creator;
@@ -100,12 +102,15 @@ public class Server {
 	}
 
 	private void actualizeRemoteAttacks() {
-		map.getRemoteAttacks().forEach((r) -> r.progress());
+		map.getRemoteAttacks().forEach(r -> r.progress());
+		map.getBlownAttacks().forEach(r -> map.getRemoteAttacks().remove(r));
+		map.getBlownAttacks().clear();
+
 	}
 
 	private void accept() {
 		try {
-			// System.out.println(".New Client is Connected");
+			System.out.println(".New Client is Connected");
 			SocketChannel channel = serverSocket.accept();
 			channel.configureBlocking(false);
 			channel.register(selector, SelectionKey.OP_READ);
@@ -194,9 +199,8 @@ public class Server {
 			if (names.contains(name) || name.length() > 10)
 				throw new NameExistsException();
 			Player player = new Player(name, new Position(15, 12), map, 100,
-					100, 20, new State());
-			player.setAvatar(new Avatar(player.getClass().getSimpleName(),
-					name, 12, 15, "NONE", "NONE", 0, 100, 100));
+					100, 200, new State());
+			player.CreateAvatar(player.getClass().getSimpleName(), player.getName());
 			names.add(name);
 			userByChannel.put(channel, new User(player));
 			channelByName.put(name, channel);

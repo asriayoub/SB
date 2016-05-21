@@ -1,8 +1,10 @@
 package Game;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class Maps {
 	private Element[][] tiles;
@@ -12,9 +14,11 @@ public class Maps {
 	private int zoneLength;
 	
 	private Collection<RemoteAttack> remoteAttacks;
+	private List<RemoteAttack> blownAttacks;
 	
 	public Maps() {
 		remoteAttacks = new HashSet<>();
+		blownAttacks=new ArrayList<>();
 	}
 
 	public Maps(Element[][] e) {
@@ -59,6 +63,14 @@ public class Maps {
 
 	public void setRemoteAttacks(Collection<RemoteAttack> remoteAttacks) {
 		this.remoteAttacks = remoteAttacks;
+	}
+
+	public List<RemoteAttack> getBlownAttacks() {
+		return blownAttacks;
+	}
+
+	public void setBlownAttacks(List<RemoteAttack> blownAttacks) {
+		this.blownAttacks = blownAttacks;
 	}
 
 	public void displayZonesNames() {

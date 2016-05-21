@@ -1,5 +1,8 @@
 package Game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Client.Avatar;
 
 public abstract class RemoteAttack extends Element {
@@ -22,6 +25,23 @@ public abstract class RemoteAttack extends Element {
 		}
 	}
 
+	public void actualizeAvatar() {
+		avatar.j = position.getJ();
+		avatar.i = position.getI();
+		avatar.direction = fromDirectionToString(direction);
+		avatar.condition = fromConditionToString(condition);
+		avatar.level = 0;
+		avatar.life = 0;
+		avatar.lifeMax = 0;
+	}
+	
+	public void CreateAvatar(String kind, String name) {
+		avatar = new Avatar(kind, name,
+				position.getJ(), position.getI(),
+				fromDirectionToString(direction),
+				fromConditionToString(condition), 0, 0, 0);
+	}
+	
 	public void progress() {
 		switch (direction) {
 		case UP:
@@ -59,12 +79,18 @@ public abstract class RemoteAttack extends Element {
 	private void hit(int i, int j) {
 		direction = Direction.NONE;
 		map.getTiles()[position.getI()][position.getJ()] = new Ground();
-		map.getRemoteAttacks().remove(this);
+		map.getBlownAttacks().add(this);
 		zone.getAttacks().remove(avatar);
+		
+		if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Player) {
+			Player target=(Player) map.getTiles()[position.getI() + i][position.getJ() + j];
+			target.getHit(this.actor);
+		}
 	}
 
 	public void refresh() {
 		if (!direction.equals(Direction.NONE)) {
+			actualizeAvatar();
 			zone.getAttacks().remove(avatar);
 			zone = map.locateTileOnZone(this.position);
 			zone.getAttacks().add(avatar);

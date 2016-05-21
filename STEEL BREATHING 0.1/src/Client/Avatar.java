@@ -16,10 +16,10 @@ public class Avatar extends Element implements Serializable {
 	public String direction;
 	public String condition;
 
-	int level;
+	public int level;
 
-	int life;
-	int lifeMax;
+	public int life;
+	public int lifeMax;
 
 	public Avatar() {
 
@@ -43,7 +43,7 @@ public class Avatar extends Element implements Serializable {
 		this.i = i;
 		this.j = j;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "Avatar [name=" + name + ", j=" + j + ", i=" + i
@@ -51,5 +51,6 @@ public class Avatar extends Element implements Serializable {
 				+ ", level=" + level + ", life=" + life + ", lifeMax="
 				+ lifeMax + "]";
 	}
+
 
 }

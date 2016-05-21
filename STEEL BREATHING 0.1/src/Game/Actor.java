@@ -148,11 +148,28 @@ public abstract class Actor extends Element {
 	}
 
 	public void refresh() {
+		actualizeAvatar();
 		zone.getPlayers().remove(avatar);
 		zone = map.locateTileOnZone(this.position);
 		zone.getPlayers().add(avatar);
 		// System.out.println(position);
 		// System.out.println(zone.getPosition());
+	}
+
+	public void actualizeAvatar() {
+		avatar.j = position.getJ();
+		avatar.i = position.getI();
+		avatar.direction = fromDirectionToString(direction);
+		avatar.condition = fromConditionToString(condition);
+		avatar.level = level;
+		avatar.life = life;
+		avatar.lifeMax = lifeMax;
+	}
+
+	public void CreateAvatar(String kind, String name) {
+		avatar = new Avatar(kind, name, position.getJ(), position.getI(),
+				fromDirectionToString(direction),
+				fromConditionToString(condition), level, life, life);
 	}
 
 	private boolean isInMap(int i, int j) {
@@ -234,12 +251,11 @@ public abstract class Actor extends Element {
 	public void fire(int i, int j) {
 		if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Ground
 				|| map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Gap) {
-			FireBall fireBall = new FireBall(map, this, new Position(position.getI()
-					+ i, position.getJ() + j), direction);
-			fireBall.avatar = new Avatar(fireBall.getClass().getSimpleName(),
-					this.getClass().getSuperclass().getSimpleName(),
-					position.getJ(), position.getI(),
-					fromDirectionToString(direction), "NONE", this.level, 0, 0);
+			FireBall fireBall = new FireBall(map, this, new Position(
+					position.getI() + i, position.getJ() + j), direction,
+					Condition.MOVINGFORWARD);
+			fireBall.CreateAvatar(fireBall.getClass().getSuperclass()
+					.getSimpleName(), fireBall.getClass().getSimpleName());
 			fireBall.loadOnMap(map);
 			System.out.println(fireBall);
 		}
@@ -252,6 +268,8 @@ public abstract class Actor extends Element {
 			condition = Condition.DEAD;
 			direction = Direction.NONE;
 		}
+		setToInactive(condition);
+		actualizeAvatar();
 	}
 
 	public void setToInactive(Condition condition) {
