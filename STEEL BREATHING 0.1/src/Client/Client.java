@@ -20,6 +20,7 @@ import javax.swing.JFrame;
 
 import org.apache.commons.lang.SerializationUtils;
 
+import Game.Avatar;
 import Game.Condition;
 import Game.Direction;
 import Game.Element;
@@ -120,7 +121,8 @@ public class Client extends JFrame implements Runnable, KeyListener,
 
 				case 103: // list of players
 					ArrayList<Avatar> data = recieveOtherPlayers();
-					receivedDataProcessing(data);
+					if (map != null)
+						receivedDataProcessing(data);
 					break;
 				default:
 					break;
@@ -159,7 +161,7 @@ public class Client extends JFrame implements Runnable, KeyListener,
 
 	public void receivedDataProcessing(ArrayList<Avatar> list) {
 		setMapClean();
-		//System.out.println("List length :" + list.size());
+		// System.out.println("List length :" + list.size());
 		list.forEach(r -> System.out.println(r));
 		list.forEach(avatar -> {
 			if (avatar.name.equals(hero.name))
@@ -270,9 +272,9 @@ public class Client extends JFrame implements Runnable, KeyListener,
 			if (a.kind.equals("Player"))
 				if (a.condition.equals("DEAD")) {
 					return Color.GRAY;
-				}else
+				} else
 					return Color.BLUE;
-			else if(a.name.equals("FireBall"))
+			else if (a.name.equals("FireBall"))
 				return Color.YELLOW;
 		}
 		return null;

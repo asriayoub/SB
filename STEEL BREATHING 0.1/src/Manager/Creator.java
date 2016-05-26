@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import Game.Condition;
+import Game.Direction;
 import Game.Element;
 import Game.Gap;
 import Game.Ground;
@@ -133,6 +135,51 @@ public class Creator {
 		return m;
 	}
 
+
+	public static String fromConditionToString(Condition e) {
+		switch (e) {
+		case STANDING:
+			return "STANDING";
+		case RUNNING:
+			return "RUNNING";
+		case WALKING:
+			return "WALKING";
+		case JUMPING:
+			return "JUMPING";
+		case UNREADY:
+			return "UNREADY";
+		case FIRING:
+			return "FIRING";
+		case STRIKING:
+			return "STRIKING";
+		case DEAD:
+			return "DEAD";
+		case HIT:
+			return "HIT";
+		case MOVINGFORWARD:
+			return "MOVINGFORWARD";
+		default:
+			return "";
+		}
+	}
+
+	public static String fromDirectionToString(Direction d) {
+		switch (d) {
+		case UP:
+			return "UP";
+		case DOWN:
+			return "DOWN";
+		case RIGHT:
+			return "RIGHT";
+		case LEFT:
+			return "LEFT";
+		case NONE:
+			return "NONE";
+		default:
+			return "";
+		}
+	}
+	
 	public static void main(String[] args) throws IOException {
 		// Creator CREATOR = new Creator();
 

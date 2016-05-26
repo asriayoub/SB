@@ -3,8 +3,6 @@ package Game;
 import java.util.Collection;
 import java.util.HashSet;
 
-import Client.Avatar;
-
 public class Zone {
 	private String name;
 	private Position position;

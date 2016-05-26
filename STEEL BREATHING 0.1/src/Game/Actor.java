@@ -1,6 +1,6 @@
 package Game;
 
-import Client.Avatar;
+import Manager.Creator;
 
 public abstract class Actor extends Element {
 
@@ -159,8 +159,8 @@ public abstract class Actor extends Element {
 	public void actualizeAvatar() {
 		avatar.j = position.getJ();
 		avatar.i = position.getI();
-		avatar.direction = fromDirectionToString(direction);
-		avatar.condition = fromConditionToString(condition);
+		avatar.direction = Creator.fromDirectionToString(direction);
+		avatar.condition = Creator.fromConditionToString(condition);
 		avatar.level = level;
 		avatar.life = life;
 		avatar.lifeMax = lifeMax;
@@ -168,8 +168,8 @@ public abstract class Actor extends Element {
 
 	public void CreateAvatar(String kind, String name) {
 		avatar = new Avatar(kind, name, position.getJ(), position.getI(),
-				fromDirectionToString(direction),
-				fromConditionToString(condition), level, life, life);
+				Creator.fromDirectionToString(direction),
+				Creator.fromConditionToString(condition), level, life, lifeMax);
 	}
 
 	private boolean isInMap(int i, int j) {
@@ -253,35 +253,42 @@ public abstract class Actor extends Element {
 				|| map.getTiles()[position.getI() + i][position.getJ() + j] instanceof Gap) {
 			FireBall fireBall = new FireBall(map, this, new Position(
 					position.getI() + i, position.getJ() + j), direction,
-					Condition.MOVINGFORWARD);
+					Condition.MOVINGFORWARD, 0, 0, 0);
 			fireBall.CreateAvatar(fireBall.getClass().getSuperclass()
 					.getSimpleName(), fireBall.getClass().getSimpleName());
-			fireBall.loadOnMap(map);
+
+			System.out.println(fireBall.map == null);
+			fireBall.loadOnMap();
 			System.out.println(fireBall);
 		}
 	}
 
 	public void getHit(Actor opponent) {
 		life = life - opponent.power;
-		if (life <= 0) {
-			life = 0;
-			condition = Condition.DEAD;
-			direction = Direction.NONE;
-		}
+		if (life <= 0)
+			die();
 		setToInactive(condition);
 		actualizeAvatar();
 	}
 
+	public void die() {
+		life = 0;
+		condition = Condition.DEAD;
+		direction = Direction.NONE;
+		map.getTiles()[position.getI()][position.getJ()] = new Ground();
+		zone.getPlayers().remove(avatar);
+	}
+
 	public void setToInactive(Condition condition) {
 		state.setInstant(System.currentTimeMillis());
-		state.setReason(fromConditionToString(condition));
+		state.setReason(Creator.fromConditionToString(condition));
 	}
 
 	public void changeDirection(Direction d) {
 		if (d == Direction.UP || d == Direction.DOWN || d == Direction.RIGHT
 				|| d == Direction.LEFT || d == Direction.NONE) {
 			direction = d;
-			avatar.direction = fromDirectionToString(d);
+			avatar.direction = Creator.fromDirectionToString(d);
 		}
 	}
 
@@ -290,15 +297,21 @@ public abstract class Actor extends Element {
 				|| c == Condition.STANDING || c == Condition.JUMPING
 				|| c == Condition.FIRING || c == Condition.STRIKING) {
 			condition = c;
-			avatar.condition = fromConditionToString(c);
+			avatar.condition = Creator.fromConditionToString(c);
 		}
 	}
 
-	public void loadOnMap(Maps m) {
+	public void loadOnMap() {
 		if (zone == null) {
-			m.getTiles()[position.getI()][position.getJ()] = this;
-			zone = m.locateTileOnZone(position);
-			zone.getPlayers().add(avatar);
+			map.getTiles()[position.getI()][position.getJ()] = this;
+			zone = map.locateTileOnZone(position);
+			if (this instanceof Player) {
+				zone.getPlayers().add(avatar);
+			} else if (this instanceof RemoteAttack) {
+				zone.getAttacks().add(avatar);
+				RemoteAttack r = (RemoteAttack) this;
+				map.getRemoteAttacks().add(r);
+			}
 		}
 	}
 

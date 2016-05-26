@@ -14,7 +14,7 @@ import java.util.Random;
 import org.apache.commons.lang.SerializationUtils;
 
 import Client.Action;
-import Client.Avatar;
+import Game.Avatar;
 import Game.Condition;
 import Game.Direction;
 import Game.Element;
@@ -62,7 +62,7 @@ public class NPC implements Runnable {
 		mapClean = null;
 		map = null;
 
-		names = generateAlphabetNames(10, 200);
+		names = generateAlphabetNames(10, 600);
 	}
 
 	public ArrayList<String> generateAlphabetNames(int length, int number) {
@@ -234,9 +234,9 @@ public class NPC implements Runnable {
 	}
 
 	public static void main(String[] args) {
-		for (int i = 0; i < 190; i++) {
+		for (int i = 0; i < 500; i++) {
 			try {
-				Thread.sleep(100);
+				Thread.sleep(200);
 				new Thread(new NPC(9090, "localhost")).start();
 			} catch (InterruptedException | IOException e) {
 				System.exit(0);

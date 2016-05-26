@@ -20,8 +20,8 @@ import java.util.TreeSet;
 import org.apache.commons.lang.SerializationUtils;
 
 import Client.Action;
-import Client.Avatar;
 import Exception.NameExistsException;
+import Game.Avatar;
 import Game.Element;
 import Game.Ground;
 import Game.Maps;
@@ -199,12 +199,12 @@ public class Server {
 			if (names.contains(name) || name.length() > 10)
 				throw new NameExistsException();
 			Player player = new Player(name, new Position(15, 12), map, 100,
-					100, 200, new State());
+					100, 20, new State());
 			player.CreateAvatar(player.getClass().getSimpleName(), player.getName());
 			names.add(name);
 			userByChannel.put(channel, new User(player));
 			channelByName.put(name, channel);
-			player.loadOnMap(map);
+			player.loadOnMap();
 			// player.getZone().displayPlayers();
 			// System.out.println("connected players:" + names.size());
 		} catch (NameExistsException e) {

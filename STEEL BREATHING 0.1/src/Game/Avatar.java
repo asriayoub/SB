@@ -1,8 +1,6 @@
-package Client;
+package Game;
 
 import java.io.Serializable;
-
-import Game.Element;
 
 public class Avatar extends Element implements Serializable {
 	private static final long serialVersionUID = 1L;
