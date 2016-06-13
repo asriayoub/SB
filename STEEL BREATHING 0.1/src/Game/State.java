@@ -3,12 +3,12 @@ package Game;
 public class State {
 	private long instant;
 	private boolean active; // INACTIVE // ACTIVE
-	private String reason; // STRIKING //HIT //FIRING //DEATH //START //NONE
+	private Condition reason; // STRIKING //HIT //FIRING //DEATH //START //NONE
 
 	public State() {
 		this.instant = System.currentTimeMillis();
 		this.active = true;
-		this.reason = "NONE";
+		this.reason = Condition.NONE;
 	}
 
 	public long getInstant() {
@@ -27,11 +27,11 @@ public class State {
 		this.active = active;
 	}
 
-	public String getReason() {
+	public Condition getReason() {
 		return reason;
 	}
 
-	public void setReason(String reason) {
+	public void setReason(Condition reason) {
 		this.reason = reason;
 	}
 

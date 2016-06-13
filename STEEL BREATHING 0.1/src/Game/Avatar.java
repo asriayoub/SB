@@ -8,11 +8,8 @@ public class Avatar extends Element implements Serializable {
 	public String kind;
 	public String name;
 
-	public int j;
-	public int i;
-
-	public String direction;
-	public String condition;
+	public Direction direction;
+	public Condition condition;
 
 	public int level;
 
@@ -23,13 +20,11 @@ public class Avatar extends Element implements Serializable {
 
 	}
 
-	public Avatar(String kind, String name, int j, int i, String direction,
-			String condition, int level, int life, int lifeMax) {
-		super();
+	public Avatar(String kind, String name, Position position,
+			Direction direction, Condition condition, int level, int life, int lifeMax) {
+		this.position = position;
 		this.kind = kind;
 		this.name = name;
-		this.j = j;
-		this.i = i;
 		this.direction = direction;
 		this.condition = condition;
 		this.level = level;
@@ -37,18 +32,12 @@ public class Avatar extends Element implements Serializable {
 		this.lifeMax = lifeMax;
 	}
 
-	public void setPosition(int i, int j) {
-		this.i = i;
-		this.j = j;
-	}
-	
 	@Override
 	public String toString() {
-		return "Avatar [name=" + name + ", j=" + j + ", i=" + i
-				+ ", direction=" + direction + ", condition=" + condition
-				+ ", level=" + level + ", life=" + life + ", lifeMax="
-				+ lifeMax + "]";
+		return "Avatar [kind=" + kind + ", name=" + name + ", direction="
+				+ direction + ", condition=" + condition + ", level=" + level
+				+ ", life=" + life + ", lifeMax=" + lifeMax + ", position="
+				+ position + "]";
 	}
-
 
 }

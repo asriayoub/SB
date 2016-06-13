@@ -10,6 +10,7 @@ public class User {
 	private int size;
 
 	private Wait awaiting;
+	private Progress progress;
 
 	private Player player;
 
@@ -18,6 +19,7 @@ public class User {
 		buffer = ByteBuffer.allocate(5000);
 		size = 5000;
 		awaiting = Wait.HERO;
+		progress = Progress.UNDONE;
 	}
 
 	public ByteBuffer getBuffer() {
@@ -52,9 +54,16 @@ public class User {
 		this.player = player;
 	}
 
+	public Progress getProgress() {
+		return progress;
+	}
+
+	public void setProgress(Progress progress) {
+		this.progress = progress;
+	}
+
 	public void reAllocateBuffer() {
 		buffer = ByteBuffer.allocate(size);
 	}
 
-	
 }

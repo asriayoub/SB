@@ -43,7 +43,7 @@ public class SBLocal extends JFrame implements KeyListener, MouseListener {
 	public SBLocal(Maps m, Player p) {
 		map = m;
 		player = p;
-		p.loadOnMap();
+		//p.loadOnMap();
 
 		System.out.println(player.getName() + player.getPosition());
 		System.out.println("Zone : " + player.getZone().getPosition());

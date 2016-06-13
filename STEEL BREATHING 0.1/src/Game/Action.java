@@ -1,9 +1,6 @@
-package Client;
+package Game;
 
 import java.io.Serializable;
-
-import Game.Condition;
-import Game.Direction;
 
 public class Action implements Serializable {
 

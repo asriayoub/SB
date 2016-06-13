@@ -28,4 +28,10 @@ public class Player extends Actor {
 		this.experience = experience;
 	}
 
+	public void loadOnMap() {
+		map.getTiles()[position.getI()][position.getJ()] = this;
+		zone = map.locateTileOnZone(position);
+		zone.getPlayers().add(avatar);
+	}
+
 }

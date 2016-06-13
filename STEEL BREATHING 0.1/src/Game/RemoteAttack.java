@@ -4,8 +4,16 @@ import Manager.Creator;
 
 public class RemoteAttack extends Actor {
 	protected Actor actor;
-
-	public void actualizeAvatar() {
+    
+	
+	public RemoteAttack(){
+		super();
+		level=0;
+		life=0;
+		lifeMax=0;
+	}
+	
+	/*public void actualizeAvatar() {
 		avatar.j = position.getJ();
 		avatar.i = position.getI();
 		avatar.direction = Creator.fromDirectionToString(direction);
@@ -13,7 +21,7 @@ public class RemoteAttack extends Actor {
 		avatar.level = 0;
 		avatar.life = 0;
 		avatar.lifeMax = 0;
-	}
+	}*/
 
 	public void progress() {
 		switch (direction) {
@@ -73,4 +81,13 @@ public class RemoteAttack extends Actor {
 				+ ", condition=" + condition + "]";
 	}
 
+	public void loadOnMap() {
+		if (zone == null) {
+			map.getTiles()[position.getI()][position.getJ()] = this;
+			zone = map.locateTileOnZone(position);
+			zone.getAttacks().add(avatar);
+			map.getRemoteAttacks().add(this);
+		}
+
+	}
 }

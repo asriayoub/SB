@@ -110,6 +110,14 @@ public abstract class Actor extends Element {
 		this.speed = speed;
 	}
 
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+
 	@Override
 	public String toString() {
 		return "Actor [name=" + name + ", map=" + map + ", zone=" + zone
@@ -157,19 +165,17 @@ public abstract class Actor extends Element {
 	}
 
 	public void actualizeAvatar() {
-		avatar.j = position.getJ();
-		avatar.i = position.getI();
-		avatar.direction = Creator.fromDirectionToString(direction);
-		avatar.condition = Creator.fromConditionToString(condition);
+		avatar.position = position;
+		avatar.direction = direction;
+		avatar.condition = condition;
 		avatar.level = level;
 		avatar.life = life;
 		avatar.lifeMax = lifeMax;
 	}
 
 	public void CreateAvatar(String kind, String name) {
-		avatar = new Avatar(kind, name, position.getJ(), position.getI(),
-				Creator.fromDirectionToString(direction),
-				Creator.fromConditionToString(condition), level, life, lifeMax);
+		avatar = new Avatar(kind, name, position, direction, condition, level,
+				life, lifeMax);
 	}
 
 	private boolean isInMap(int i, int j) {
@@ -189,20 +195,20 @@ public abstract class Actor extends Element {
 	public boolean isActive() {
 		long SecondeInstant = System.currentTimeMillis();
 		if ((SecondeInstant - state.getInstant() > 200 && state.getReason()
-				.equals("WALKING"))
+				.equals(Condition.WALKING))
 				|| (SecondeInstant - state.getInstant() > 200 && state
-						.getReason().equals("JUMPING"))
+						.getReason().equals(Condition.JUMPING))
 				|| (SecondeInstant - state.getInstant() > 200 && state
-						.getReason().equals("RUNNING"))
+						.getReason().equals(Condition.RUNNING))
 				|| (SecondeInstant - state.getInstant() > 150 && state
-						.getReason().equals("STRIKING"))
+						.getReason().equals(Condition.STRIKING))
 				|| (SecondeInstant - state.getInstant() > 300 && state
-						.getReason().equals("FIRING"))
+						.getReason().equals(Condition.FIRING))
 				|| (SecondeInstant - state.getInstant() > 150 && state
-						.getReason().equals("HIT"))
-				|| state.getReason().equals("NONE")) {
+						.getReason().equals(Condition.HIT))
+				|| state.getReason().equals(Condition.NONE)) {
 			state.setActive(true);
-			state.setReason("NONE");
+			state.setReason(Condition.NONE);
 		} else
 			state.setActive(false);
 		return state.isActive();
@@ -221,7 +227,6 @@ public abstract class Actor extends Element {
 					strike(i, j);
 					break;
 				case FIRING:
-					System.out.println("fire");
 					fire(i, j);
 					break;
 				default:
@@ -235,7 +240,6 @@ public abstract class Actor extends Element {
 		map.getTiles()[position.getI()][position.getJ()] = new Ground();
 		map.getTiles()[position.getI() + i][position.getJ() + j] = this;
 		position = new Position(position.getI() + i, position.getJ() + j);
-		avatar.setPosition(position.getI(), position.getJ());
 	}
 
 	public void strike(int i, int j) {
@@ -256,10 +260,7 @@ public abstract class Actor extends Element {
 					Condition.MOVINGFORWARD, 0, 0, 0);
 			fireBall.CreateAvatar(fireBall.getClass().getSuperclass()
 					.getSimpleName(), fireBall.getClass().getSimpleName());
-
-			System.out.println(fireBall.map == null);
 			fireBall.loadOnMap();
-			System.out.println(fireBall);
 		}
 	}
 
@@ -276,19 +277,18 @@ public abstract class Actor extends Element {
 		condition = Condition.DEAD;
 		direction = Direction.NONE;
 		map.getTiles()[position.getI()][position.getJ()] = new Ground();
-		zone.getPlayers().remove(avatar);
+		// zone.getPlayers().remove(avatar);
 	}
 
 	public void setToInactive(Condition condition) {
 		state.setInstant(System.currentTimeMillis());
-		state.setReason(Creator.fromConditionToString(condition));
+		state.setReason(condition);
 	}
 
 	public void changeDirection(Direction d) {
 		if (d == Direction.UP || d == Direction.DOWN || d == Direction.RIGHT
 				|| d == Direction.LEFT || d == Direction.NONE) {
 			direction = d;
-			avatar.direction = Creator.fromDirectionToString(d);
 		}
 	}
 
@@ -297,22 +297,9 @@ public abstract class Actor extends Element {
 				|| c == Condition.STANDING || c == Condition.JUMPING
 				|| c == Condition.FIRING || c == Condition.STRIKING) {
 			condition = c;
-			avatar.condition = Creator.fromConditionToString(c);
 		}
 	}
 
-	public void loadOnMap() {
-		if (zone == null) {
-			map.getTiles()[position.getI()][position.getJ()] = this;
-			zone = map.locateTileOnZone(position);
-			if (this instanceof Player) {
-				zone.getPlayers().add(avatar);
-			} else if (this instanceof RemoteAttack) {
-				zone.getAttacks().add(avatar);
-				RemoteAttack r = (RemoteAttack) this;
-				map.getRemoteAttacks().add(r);
-			}
-		}
-	}
+	public abstract void loadOnMap();
 
 }

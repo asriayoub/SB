@@ -1,13 +1,17 @@
 package Game;
 
-public class Position {
+import java.io.Serializable;
+
+public class Position implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private int i;
 	private int j;
 
-	public Position(){
-		
+	public Position() {
+
 	}
-	
+
 	public Position(int i, int j) {
 		this.i = i;
 		this.j = j;

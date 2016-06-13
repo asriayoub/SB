@@ -1,8 +1,10 @@
 package NPC;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -11,9 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.lang.SerializationUtils;
-
-import Client.Action;
+import Game.Action;
 import Game.Avatar;
 import Game.Condition;
 import Game.Direction;
@@ -30,6 +30,8 @@ public class NPC implements Runnable {
 	byte[] dataOut;
 	ByteArrayInputStream bis;
 	ObjectInputStream ois;
+	public ByteArrayOutputStream bos;
+	public ObjectOutputStream oos;
 
 	Element[][] mapClean;
 	Element[][] map;
@@ -38,6 +40,8 @@ public class NPC implements Runnable {
 
 	Condition condition;
 	Direction direction;
+	Phase phase;
+
 	int keyTyped;
 
 	List<String> names;
@@ -47,6 +51,8 @@ public class NPC implements Runnable {
 		bufferOut = ByteBuffer.allocate(5000);
 		bis = null;
 		ois = null;
+		bos = null;
+		oos = null;
 
 		socket = SocketChannel.open();
 		socket.configureBlocking(true);
@@ -56,6 +62,7 @@ public class NPC implements Runnable {
 
 		condition = Condition.STANDING;
 		direction = Direction.NONE;
+		phase = Phase.NAME;
 		keyTyped = 0;
 
 		hero = new Avatar();
@@ -65,41 +72,27 @@ public class NPC implements Runnable {
 		names = generateAlphabetNames(10, 600);
 	}
 
-	public ArrayList<String> generateAlphabetNames(int length, int number) {
-		ArrayList<String> names = new ArrayList<>();
-		char[] alphabet = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-				'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-				'w', 'x', 'y', 'z' };
-
-		Random rand = new Random();
-		String name;
-		int r;
-		for (int j = 0; j < number; j++) {
-			name = "";
-			for (int i = 0; i < length; i++) {
-				r = rand.nextInt(26);
-				name += alphabet[r];
-			}
-			names.add(name);
-		}
-		return names;
-	}
-
 	@Override
 	public void run() {
 		try {
+			int response, n;
 			sendName();
 			while (true) {
 				reAllocateBuffer();
-				if (socket.read(bufferIn) == -1)
+				if ((n = socket.read(bufferIn)) == -1)
 					throw new IOException();
 				bufferIn.flip();
-				int response = bufferIn.getInt();
+				if (n < 4) {
+					response = 404;
+					bufferIn.clear();
+				} else
+					response = bufferIn.getInt();
 				// System.out.println(response);
 				switch (response) {
 
 				case 100: // hero
 					recieveHero();
+					sendNext();
 					new Thread(new Spamer(this)).start();
 					break;
 
@@ -108,23 +101,25 @@ public class NPC implements Runnable {
 					break;
 
 				case 102: // map
-					System.out.println(Thread.currentThread().getName() + " : "
+					System.out.println("MAP : "
+							+ Thread.currentThread().getName() + " : "
 							+ response);
+
 					recieveCleanMap();
 					setMapClean();
+					sendNext();
 					break;
 
 				case 103: // list of players
 					ArrayList<Avatar> data = recieveOtherPlayers();
-					if (map != null)
-						receivedDataProcessing(data);
+					receivedDataProcessing(data);
 					break;
 				default:
 					break;
 				}
 			}
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			System.out.println(Thread.currentThread().getName());
 		}
 	}
 
@@ -140,18 +135,22 @@ public class NPC implements Runnable {
 		ifBufferHasRemaining();
 		collectBigData();
 		mapClean = (Element[][]) ois.readObject();
+		phase = Phase.PLAYING;
 	}
 
 	private void recieveHero() throws IOException, ClassNotFoundException {
 		ifBufferHasRemaining();
-		dataIn = new byte[bufferIn.remaining()];
-		bufferIn.get(dataIn);
-		// System.out.println(dataIn.length);
-		bis = new ByteArrayInputStream(dataIn);
-		ois = new ObjectInputStream(bis);
-		hero = (Avatar) ois.readObject();
-		// System.out.println(hero);
-		bufferIn.clear();
+		if (phase == Phase.NAME) {
+			dataIn = new byte[bufferIn.remaining()];
+			bufferIn.get(dataIn);
+			// System.out.println(dataIn.length);
+			bis = new ByteArrayInputStream(dataIn);
+			ois = new ObjectInputStream(bis);
+			hero = (Avatar) ois.readObject();
+			System.out.println(hero);
+			bufferIn.clear();
+			phase = Phase.MAP;
+		}
 	}
 
 	public void receivedDataProcessing(ArrayList<Avatar> list) {
@@ -161,7 +160,7 @@ public class NPC implements Runnable {
 		list.forEach(actor -> {
 			if (actor.name.equals(hero.name))
 				hero = actor;
-			map[actor.i][actor.j] = actor;
+			map[actor.getPosition().getI()][actor.getPosition().getJ()] = actor;
 		});
 		// System.out.println("[" + hero.i + "][" + hero.j + "]");
 	}
@@ -191,16 +190,31 @@ public class NPC implements Runnable {
 		try {
 			bufferOut.clear();
 			bufferOut.putInt(1);
-			dataOut = SerializationUtils.serialize(new Action(direction,
-					condition));
+			bos = new ByteArrayOutputStream();
+			oos = new ObjectOutputStream(bos);
+			oos.writeObject(new Action(direction, condition));
+			dataOut = bos.toByteArray();
 			bufferOut.put(dataOut);
 			bufferOut.flip();
 			socket.write(bufferOut);
+			bufferOut.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+
+	private void sendNext() throws IOException {
+		try {
+			bufferOut.clear();
+			bufferOut.putInt(10);
+			bufferOut.flip();
+			socket.write(bufferOut);
+			bufferOut.clear();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	private void collectBigData() throws IOException {
 		int n;
 		int length = bufferIn.getInt();
@@ -233,8 +247,28 @@ public class NPC implements Runnable {
 		}
 	}
 
+	public ArrayList<String> generateAlphabetNames(int length, int number) {
+		ArrayList<String> names = new ArrayList<>();
+		char[] alphabet = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+				'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+				'w', 'x', 'y', 'z' };
+
+		Random rand = new Random();
+		String name;
+		int r;
+		for (int j = 0; j < number; j++) {
+			name = "";
+			for (int i = 0; i < length; i++) {
+				r = rand.nextInt(26);
+				name += alphabet[r];
+			}
+			names.add(name);
+		}
+		return names;
+	}
+
 	public static void main(String[] args) {
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < 10; i++) {
 			try {
 				Thread.sleep(200);
 				new Thread(new NPC(9090, "localhost")).start();
