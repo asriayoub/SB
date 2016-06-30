@@ -33,8 +33,7 @@ public class NPC implements Runnable {
 	public ByteArrayOutputStream bos;
 	public ObjectOutputStream oos;
 
-	Element[][] mapClean;
-	Element[][] map;
+	Avatar[][] map,mapClean;
 	Avatar hero;
 	HashMap<Position, Player> otherPlayers;
 
@@ -134,7 +133,7 @@ public class NPC implements Runnable {
 	private void recieveCleanMap() throws ClassNotFoundException, IOException {
 		ifBufferHasRemaining();
 		collectBigData();
-		mapClean = (Element[][]) ois.readObject();
+		mapClean = (Avatar[][]) ois.readObject();
 		phase = Phase.PLAYING;
 	}
 
@@ -166,7 +165,7 @@ public class NPC implements Runnable {
 	}
 
 	public void setMapClean() {
-		map = new Element[mapClean.length][mapClean.length];
+		map = new Avatar[mapClean.length][mapClean.length];
 		for (int i = 0; i < mapClean.length; i++)
 			for (int j = 0; j < mapClean.length; j++)
 				map[i][j] = mapClean[i][j];

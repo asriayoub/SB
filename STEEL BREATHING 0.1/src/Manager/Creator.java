@@ -11,6 +11,7 @@ import Game.Direction;
 import Game.Element;
 import Game.Gap;
 import Game.Ground;
+import Game.Kind;
 import Game.Maps;
 import Game.Obstacle;
 import Game.Position;
@@ -135,7 +136,26 @@ public class Creator {
 		return m;
 	}
 
-
+	public static Kind getKind(Element element){
+		switch (element.getClass().getSimpleName()) {
+		case "Actor":
+			return Kind.ACTOR;
+		case "Obstacle":
+			return Kind.OBSTACLE;
+		case "Gap":
+			return Kind.GAP;
+		case "Ground":
+			return Kind.GROUND;
+		case "RemoteAttack":
+			return Kind.ATTACK;
+		case "FireBall":
+			return Kind.ATTACK;
+		case "Player":
+			return Kind.ACTOR;
+		default:
+			return Kind.NONE;
+		}
+	}
 //	public static String fromConditionToString(Condition e) {
 //		switch (e) {
 //		case STANDING:

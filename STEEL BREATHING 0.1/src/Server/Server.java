@@ -24,6 +24,7 @@ import Game.Avatar;
 import Game.Condition;
 import Game.Direction;
 import Game.Element;
+import Game.FireBall;
 import Game.Ground;
 import Game.Maps;
 import Game.Player;
@@ -31,13 +32,14 @@ import Game.Position;
 import Game.State;
 import Game.Wait;
 import Manager.Creator;
+import View.ServerFrame;
 
 public class Server {
 	private ServerSocketChannel serverSocket;
 	public Selector selector;
 	private ByteBuffer buffer;
 
-	private Element[][] mapClean;
+	private Avatar[][] mapClean;
 	private Maps map;
 
 	private HashMap<String, SocketChannel> channelByName;
@@ -59,13 +61,32 @@ public class Server {
 		names = new TreeSet<>();
 
 		Creator creator = new Creator();
-		mapClean = creator.readMapFromFile("BattleField").getTiles();
+
 		map = creator.readMapFromFile("BattleField");
+		mapClean = createMapCleanToSend();
 		creator.displayZones(map);
 
+		new ServerFrame();
+	}
+
+	private Avatar[][] createMapCleanToSend() {
+		Element[][] tiles = map.getTiles();
+		Avatar[][] mapClean = new Avatar[tiles.length][tiles.length];
+		for (int i = 0; i < tiles.length; i++) {
+			for (int j = 0; j < tiles.length; j++) {
+				mapClean[j][i] = new Avatar(Creator.getKind(tiles[j][i]),
+						"Tile");
+			}
+		}
+		return mapClean;
 	}
 
 	public void run() throws IOException {
+		FireBall fireBall = new FireBall(map, new Player(),
+				new Position(15, 16), Direction.NONE, Condition.MOVINGFORWARD,
+				0, 0, 0);
+		fireBall.CreateAvatar(fireBall.getClass().getSimpleName());
+		fireBall.loadOnMap();
 		System.out.println("SERVER LAUNCHED..");
 		long interval, time1, time2;
 		while (true) {
@@ -188,14 +209,6 @@ public class Server {
 		buffer.clear();
 	}
 
-	//
-	// private void processingResendRequest(SocketChannel channel) {
-	// System.out.println("there");
-	// User user = userByChannel.get(channel);
-	// user.setProgress(Progress.UNDONE);
-	// user.reAllocateBuffer();
-	// }
-
 	private void processingNextRequest(SocketChannel channel)
 			throws ClosedChannelException {
 		User user = userByChannel.get(channel);
@@ -235,8 +248,7 @@ public class Server {
 				throw new NameExistsException();
 			Player player = new Player(name, new Position(15, 12), map, 100,
 					100, 20, new State());
-			player.CreateAvatar(player.getClass().getSimpleName(),
-					player.getName());
+			player.CreateAvatar(player.getName());
 			names.add(name);
 			userByChannel.put(channel, new User(player));
 			channelByName.put(name, channel);

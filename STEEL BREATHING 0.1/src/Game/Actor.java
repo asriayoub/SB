@@ -173,8 +173,8 @@ public abstract class Actor extends Element {
 		avatar.lifeMax = lifeMax;
 	}
 
-	public void CreateAvatar(String kind, String name) {
-		avatar = new Avatar(kind, name, position, direction, condition, level,
+	public void CreateAvatar(String name) {
+		avatar = new Avatar(Creator.getKind(this), name, position, direction, condition, level,
 				life, lifeMax);
 	}
 
@@ -258,8 +258,7 @@ public abstract class Actor extends Element {
 			FireBall fireBall = new FireBall(map, this, new Position(
 					position.getI() + i, position.getJ() + j), direction,
 					Condition.MOVINGFORWARD, 0, 0, 0);
-			fireBall.CreateAvatar(fireBall.getClass().getSuperclass()
-					.getSimpleName(), fireBall.getClass().getSimpleName());
+			fireBall.CreateAvatar(fireBall.getClass().getSimpleName());
 			fireBall.loadOnMap();
 		}
 	}

@@ -1,27 +1,15 @@
 package Game;
 
-import Manager.Creator;
 
 public class RemoteAttack extends Actor {
 	protected Actor actor;
-    
-	
-	public RemoteAttack(){
+
+	public RemoteAttack() {
 		super();
-		level=0;
-		life=0;
-		lifeMax=0;
+		level = 0;
+		life = 0;
+		lifeMax = 0;
 	}
-	
-	/*public void actualizeAvatar() {
-		avatar.j = position.getJ();
-		avatar.i = position.getI();
-		avatar.direction = Creator.fromDirectionToString(direction);
-		avatar.condition = Creator.fromConditionToString(condition);
-		avatar.level = 0;
-		avatar.life = 0;
-		avatar.lifeMax = 0;
-	}*/
 
 	public void progress() {
 		switch (direction) {
@@ -60,6 +48,13 @@ public class RemoteAttack extends Actor {
 			Player target = (Player) map.getTiles()[position.getI() + i][position
 					.getJ() + j];
 			target.getHit(this.actor);
+		} else if (map.getTiles()[position.getI() + i][position.getJ() + j] instanceof RemoteAttack) {
+			RemoteAttack target = (RemoteAttack) map.getTiles()[position.getI() + i][position
+					.getJ() + j];
+			target.direction = Direction.NONE;
+			map.getTiles()[target.position.getI()][target.position.getJ()] = new Ground();
+			map.getBlownAttacks().add(target);
+			zone.getAttacks().remove(target.avatar);
 		}
 	}
 
