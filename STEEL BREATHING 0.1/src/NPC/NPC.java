@@ -271,7 +271,7 @@ public class NPC implements Runnable {
 		for (int i = 0; i < 10; i++) {
 			try {
 				Thread.sleep(200);
-				new Thread(new NPC(9090, "localhost")).start();
+				new Thread(new NPC(80, "localhost")).start();
 			} catch (InterruptedException | IOException e) {
 				System.exit(0);
 			}

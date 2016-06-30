@@ -417,7 +417,7 @@ public class Server {
 
 	public static void main(String[] args) {
 		try {
-			new Server(9090).run();
+			new Server(80).run();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
