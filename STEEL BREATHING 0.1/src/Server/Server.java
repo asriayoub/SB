@@ -24,7 +24,6 @@ import Game.Avatar;
 import Game.Condition;
 import Game.Direction;
 import Game.Element;
-import Game.FireBall;
 import Game.Ground;
 import Game.Maps;
 import Game.Player;
@@ -82,11 +81,6 @@ public class Server {
 	}
 
 	public void run() throws IOException {
-		FireBall fireBall = new FireBall(map, new Player(),
-				new Position(15, 16), Direction.NONE, Condition.MOVINGFORWARD,
-				0, 0, 0);
-		fireBall.CreateAvatar(fireBall.getClass().getSimpleName());
-		fireBall.loadOnMap();
 		System.out.println("SERVER LAUNCHED..");
 		long interval, time1, time2;
 		while (true) {
@@ -246,7 +240,7 @@ public class Server {
 			String name = Charset.forName("UTF-8").decode(buffer).toString();
 			if (names.contains(name) || name.length() > 10)
 				throw new NameExistsException();
-			Player player = new Player(name, new Position(15, 12), map, 100,
+			Player player = new Player(name, new Position(15, 12), map, 200,
 					100, 20, new State());
 			player.CreateAvatar(player.getName());
 			names.add(name);
